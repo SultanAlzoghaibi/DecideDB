@@ -1,5 +1,5 @@
 # Rust build output
-/target
+target/
 **/*.rs.bk
 *.pdb
 
@@ -14,3 +14,7 @@
 # Env / secrets
 .env
 .env.*
+
+# Frontend
+node_modules/
+dist/

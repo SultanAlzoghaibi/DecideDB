@@ -1,0 +1,58 @@
+/* Design tokens. Source of truth: /DESIGN.md */
+:root {
+  /* Surfaces (60%) */
+  --color-void: #08090a;
+  --color-carbon: #0f1011;
+  --color-obsidian: #161718;
+  --color-slate: #23252a;
+
+  /* Structure and text (30%) */
+  --color-graphite: #23252a;
+  --color-smoke: #383b3f;
+  --color-ash: #62666d;
+  --color-fog: #8a8f98;
+  --color-mist: #d0d6e0;
+  --color-paper: #ffffff;
+
+  /* Accent (10%) */
+  --color-accent: #d45bb6;
+  --color-accent-hover: #de78c4;
+  --color-accent-muted: rgba(212, 91, 182, 0.12);
+  --color-on-accent: #08090a;
+
+  /* Semantic */
+  --color-good: #27a644;
+  --color-bad: #f0653a;
+  --color-warn: #e3b341;
+
+  /* Typography */
+  --font-ui: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --weight-regular: 400;
+  --weight-medium: 510;
+  --weight-strong: 590;
+
+  /* Spacing (4px base) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+
+  /* Radius */
+  --radius-badge: 4px;
+  --radius-button: 6px;
+  --radius-input: 6px;
+  --radius-card: 12px;
+  --radius-pill: 9999px;
+
+  /* Border */
+  --border: 1px solid var(--color-graphite);
+  --border-hover: 1px solid var(--color-accent);
+}

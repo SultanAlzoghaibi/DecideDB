@@ -1,0 +1,151 @@
+/* ---------- Docs layout ---------- */
+.docs {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 720px);
+  gap: var(--space-16);
+  padding-top: var(--space-12);
+}
+
+.docs__sidebar {
+  position: sticky;
+  top: calc(64px + var(--space-12));
+  align-self: start;
+}
+
+.docs__group {
+  margin: 0 0 var(--space-3);
+  color: var(--color-paper);
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+}
+
+.docs__sidebar nav {
+  display: grid;
+  border-left: var(--border);
+}
+
+/* Same language as a hovered table row: a 2px accent marker on the left. */
+.docs__link {
+  margin-left: -1px;
+  padding: 6px var(--space-3);
+  border-left: 2px solid transparent;
+  color: var(--color-fog);
+  font-size: 13px;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.docs__link:hover {
+  color: var(--color-paper);
+}
+
+.docs__link--active {
+  border-left-color: var(--color-accent);
+  color: var(--color-paper);
+}
+
+/* ---------- Notice ---------- */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-carbon);
+  font-size: 14px;
+}
+
+.notice p {
+  margin: 0;
+  color: var(--color-fog);
+}
+
+/* ---------- Doc content ---------- */
+.doc {
+  padding-top: var(--space-12);
+  scroll-margin-top: 80px;
+}
+
+.doc h1,
+.doc h2 {
+  margin: 0 0 var(--space-4);
+  color: var(--color-paper);
+  font-weight: var(--weight-medium);
+  letter-spacing: -0.022em;
+}
+
+.doc h1 {
+  font-size: 36px;
+  line-height: 1.1;
+}
+
+.doc h2 {
+  font-size: 24px;
+  line-height: 1.25;
+}
+
+.doc p,
+.doc ul {
+  margin: 0 0 var(--space-4);
+  color: var(--color-mist);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.doc ul {
+  padding-left: var(--space-5);
+}
+
+.doc li + li {
+  margin-top: var(--space-1);
+}
+
+.doc strong {
+  color: var(--color-paper);
+  font-weight: var(--weight-medium);
+}
+
+.doc :not(pre) > code {
+  padding: 1px 5px;
+  border-radius: var(--radius-badge);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-paper);
+  font-size: 0.85em;
+}
+
+.doc .code {
+  margin-bottom: var(--space-4);
+}
+
+.doc__note {
+  color: var(--color-fog) !important;
+  font-size: 13px !important;
+}
+
+.doc__table {
+  margin-bottom: var(--space-4);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-carbon);
+  overflow-x: auto;
+}
+
+.doc__table td {
+  font-size: 13px;
+  white-space: normal;
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 900px) {
+  .docs {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding-top: var(--space-6);
+  }
+
+  .docs__sidebar {
+    display: none;
+  }
+}
