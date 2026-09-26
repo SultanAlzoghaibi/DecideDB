@@ -31,6 +31,7 @@ Rust proxy + logging (hardcoded API key) -> web UI table -> grading -> real API 
 Don't build later steps early. RLS, PgBouncer, partitioning and column encryption are deferred until there are users.
 
 ## Rules
+- Rust code: follow the `rust-skills` skill (`.claude/skills/rust-skills/`), prioritizing CRITICAL/HIGH rules (ownership, errors, async). Skip micro-optimizations (SmallVec, arenas, SIMD, etc.) unless profiling shows a need — simple, readable code wins while the developer is learning.
 - No exotic infra or paid dependencies. Postgres only. `docker compose up` must be enough to start.
 - Keep changes small and reviewable; one feature at a time.
 - Ask before adding a new dependency; say what it does and why.

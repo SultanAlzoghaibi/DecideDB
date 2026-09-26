@@ -47,6 +47,7 @@ browser ──▶ web UI ──────────────────�
 - **PgBouncer** connection pooling.
 - **Time-based table partitioning** + configurable retention.
 - **Encryption at rest** for `state`.
+- **Region:** AWS `us-east-1` (latency tests point to Jev being hosted there). Run the proxy + Postgres in the same region.
 - **Deploy shape:** single VM — Postgres + 2–3 stateless async pods, via Docker Compose. Reasonable weekend scope.
 - **Web UI:** Bun web server that calls the Rust API. The Rust API is the only thing that touches Postgres and Jev; keep business logic there, not in the web layer.
 
