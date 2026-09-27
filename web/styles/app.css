@@ -405,18 +405,55 @@ code,
 }
 
 /* ---------- Flow diagram ---------- */
+/* Main row: your app <-> jevdb sdk <-> Jev API (solid = the call your app waits on).
+   The SDK copies the request up to JevDB and the response down to JevDB
+   (dashed = background sends your app never waits on). */
 .flow {
   display: grid;
-  grid-template-columns: 1fr 120px 1fr 120px 1fr;
+  grid-template-columns: minmax(0, 1fr) 140px minmax(0, 1fr) 140px minmax(0, 1fr);
   grid-template-areas:
-    "app a proxy b jev"
-    ". . down . ."
-    ". . db . .";
+    ".   .     in   .     .  "
+    ".   .     up   .     .  "
+    "app to-sdk sdk to-jev jev"
+    ".   .     down .     .  "
+    ".   .     out  .     .  ";
   align-items: center;
   margin-top: var(--space-12);
+  isolation: isolate; /* keeps the frame's z-index: -1 inside the diagram */
+}
+
+/* Nested + joined variants: an outline labelled "your app" around your code + the SDK.
+   Negative margins grow it past its grid cells so the labels and lines have room. */
+.flow__frame {
+  position: relative;
+  z-index: -1;
+  grid-row: 3;
+  grid-column: 1 / 4;
+  align-self: stretch;
+  margin: -36px -16px -16px;
+  border: 1px solid var(--color-smoke);
+  border-radius: var(--radius-card);
+}
+
+/* Taller copy lines so their labels sit clear of the frame's edge. */
+.flow--nested .flow__link--copy,
+.flow--joined .flow__link--copy {
+  height: 104px;
+}
+
+.flow__frame-label {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-3);
+  color: var(--color-fog);
+  font-family: var(--font-mono);
+  font-size: 11px;
 }
 
 .flow__node {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
   padding: var(--space-4);
   border: var(--border);
   border-radius: var(--radius-card);
@@ -427,96 +464,1311 @@ code,
   text-align: center;
 }
 
-.flow__node--app { grid-area: app; }
-.flow__node--jev { grid-area: jev; }
-.flow__node--db { grid-area: db; }
+.flow__node small {
+  color: var(--color-ash);
+  font-size: 11px;
+}
 
-/* JevDB is the one node that gets the accent. */
-.flow__node--proxy {
-  grid-area: proxy;
+.flow__node--app { grid-area: app; }
+.flow__node--sdk { grid-area: sdk; }
+.flow__node--jev { grid-area: jev; }
+.flow__node--in { grid-area: in; }
+.flow__node--out { grid-area: out; }
+
+.flow__node--sdk small {
+  color: var(--color-accent);
+}
+
+/* JevDB gets the accent. */
+.flow__node--in,
+.flow__node--out {
   border-color: var(--color-accent);
   color: var(--color-paper);
 }
 
-.flow__link {
+.flow__link--to-sdk { grid-area: to-sdk; }
+.flow__link--to-jev { grid-area: to-jev; }
+.flow__link--up { grid-area: up; }
+.flow__link--down { grid-area: down; }
+
+/* Main links hold two lines: request on top, response underneath. */
+.flow__link--main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: 0 var(--space-2);
+}
+
+.flow__link--copy {
+  display: flex;
+  justify-content: center;
+  height: 64px;
+}
+
+.flow__line {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 40px;
 }
 
-.flow__link--a { grid-area: a; }
-.flow__link--b { grid-area: b; }
-
-/* The line, drawn with a pseudo-element so the label can sit on top of it. */
-.flow__link::before {
+.flow__line::before {
   content: "";
   position: absolute;
+}
+
+/* Horizontal lines (main row on desktop). */
+.flow__link--main .flow__line {
+  height: 20px;
+}
+
+.flow__link--main .flow__line::before {
   left: 0;
   right: 0;
   top: 50%;
   border-top: 1px solid var(--color-smoke);
 }
 
-.flow__link span {
+.flow__link--main .flow__pulse {
+  top: 50%;
+}
+
+/* Vertical lines (copies to JevDB on desktop). */
+.flow__link--copy .flow__line {
+  width: 100%;
+}
+
+.flow__link--copy .flow__line::before {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed var(--color-smoke);
+}
+
+.flow__link--copy .flow__pulse {
+  left: 50%;
+}
+
+.flow__label {
   position: relative;
   padding: 0 var(--space-2);
   background: var(--color-void);
   color: var(--color-ash);
   font-family: var(--font-mono);
   font-size: 11px;
+  white-space: nowrap;
 }
 
-.flow__link--down {
-  grid-area: down;
-  height: 56px;
+/* A glowing dot that travels one line. All pulses share one 4.8s loop and each
+   travels for 0.8s (1/6 of it). --delay picks when it fires:
+   0s app->sdk, 0.8s sdk->jev + copy of request, 2s jev->sdk, 2.8s sdk->app + copy of response. */
+.flow__pulse {
+  position: absolute;
+  z-index: 1;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 10px 2px var(--color-accent);
+  opacity: 0;
+  animation: 4.8s linear var(--delay, 0s) infinite;
 }
 
-.flow__link--down::before {
+/* Which way each pulse travels. Mobile turns the diagram sideways (see the 900px query). */
+.flow__pulse--fwd { animation-name: move-right; }
+.flow__pulse--back { animation-name: move-left; }
+.flow__pulse--copy-in { animation-name: move-up; }
+.flow__pulse--copy-out { animation-name: move-down; }
+
+@keyframes move-right {
+  0% { left: 0; opacity: 0; }
+  3%, 16% { opacity: 1; }
+  16.67%, 100% { left: 100%; opacity: 0; }
+}
+
+@keyframes move-left {
+  0% { left: 100%; opacity: 0; }
+  3%, 16% { opacity: 1; }
+  16.67%, 100% { left: 0; opacity: 0; }
+}
+
+@keyframes move-down {
+  0% { top: 0; opacity: 0; }
+  3%, 16% { opacity: 1; }
+  16.67%, 100% { top: 100%; opacity: 0; }
+}
+
+@keyframes move-up {
+  0% { top: 100%; opacity: 0; }
+  3%, 16% { opacity: 1; }
+  16.67%, 100% { top: 0; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow__pulse {
+    display: none;
+  }
+}
+
+/* JevDB and Jev API boxes show a logo next to the name. */
+.flow__brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.flow__jev-logo {
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* A box flashes white the moment a pulse hits it. Same 4.8s loop as the pulses. */
+.flow__node--in,
+.flow__node--out,
+.flow__node--jev {
+  animation: node-hit 4.8s ease-out var(--ping, 0s) infinite;
+}
+
+.flow__node--in,
+.flow__node--jev { --ping: 1.6s; }
+.flow__node--out { --ping: 3.6s; }
+
+/* C/D send everything 0.8s earlier (no your code -> SDK line), so pings land earlier too. */
+.flow--joined .flow__node--in,
+.flow--joined .flow__node--jev,
+.flow--wrapped .flow__node--in,
+.flow--wrapped .flow__node--jev { --ping: 0.8s; }
+.flow--joined .flow__node--out,
+.flow--wrapped .flow__node--out { --ping: 2.8s; }
+
+@keyframes node-hit {
+  0% {
+    box-shadow: 0 0 0 1px var(--color-paper), 0 0 18px 2px rgba(255, 255, 255, 0.45);
+  }
+  10%, 100% {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0), 0 0 18px 2px rgba(255, 255, 255, 0);
+  }
+}
+
+/* ---- Joined (C): your code and the SDK are one block split in two. ---- */
+/* The SDK is a small piece of your app: your code is exactly twice its width. */
+.flow--joined {
+  grid-template-columns: 248px 124px 140px 200px;
+  justify-content: center;
+  grid-template-areas:
+    ".   in   .      .  "
+    ".   up   .      .  "
+    "app sdk  to-jev jev"
+    ".   down .      .  "
+    ".   out  .      .  ";
+}
+
+.flow--joined .flow__frame {
+  grid-column: 1 / 3;
+}
+
+/* JevDB boxes keep their normal width, centred over the narrow SDK column. */
+.flow--joined .flow__node--in,
+.flow--joined .flow__node--out {
+  justify-self: unsafe center;
+  width: 200px;
+}
+
+.flow--joined .flow__node--app,
+.flow--joined .flow__node--sdk {
+  align-self: stretch;
+  justify-content: center;
+}
+
+.flow--joined .flow__node--app {
+  border-right: none;
+  border-radius: var(--radius-card) 0 0 var(--radius-card);
+}
+
+.flow--joined .flow__node--sdk {
+  position: relative; /* anchor for the call/response bursts on its left edge */
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
+  background: var(--color-obsidian);
+  color: var(--color-paper);
+}
+
+/* ---- C with one JevDB under the SDK (SdkFlowOneDb, review only) ---- */
+.flow--one-db {
+  grid-template-columns: 248px 124px 140px 200px;
+  grid-template-areas:
+    "app sdk     to-jev jev"
+    ".   db-link .      .  "
+    ".   db      .      .  ";
+}
+
+.flow--one-db .flow__frame {
+  grid-row: 1;
+  grid-column: 1 / 3;
+}
+
+.flow--one-db .flow__link--db {
+  height: 112px;
+}
+
+/* White flash on the single JevDB when a copy lands. */
+.flow--one-db .flow__hit {
+  animation-name: node-flash;
+}
+
+/* Slowed version of C: every animation runs on --loop (set in SdkFlowOneDb). */
+.flow--one-db .flow__pulse,
+.flow--one-db .flow__burst-text,
+.flow--one-db .flow__spark,
+.flow--one-db .flow__node--jev {
+  animation-duration: var(--loop);
+}
+
+/* Take the slowed flash time from the diagram (set in SdkFlowOneDb) instead of C's 0.8s. */
+.flow--one-db .flow__node--jev {
+  --ping: inherit;
+}
+
+@keyframes node-flash {
+  0% { opacity: 1; }
+  10%, 100% { opacity: 0; }
+}
+
+/* ---- Wrapped (D): the SDK is a layer around your code, inside your app. ---- */
+.flow--wrapped {
+  grid-template-columns: minmax(0, 1.6fr) 140px minmax(0, 1fr);
+  grid-template-areas:
+    "in   .      .  "
+    "up   .      .  "
+    "app  to-jev jev"
+    "down .      .  "
+    "out  .      .  ";
+}
+
+.flow--wrapped .flow__node--in,
+.flow--wrapped .flow__node--out {
+  justify-self: center;
+  width: min(100%, 240px);
+}
+
+.flow__app {
+  grid-area: app;
+  position: relative;
+  padding: 32px var(--space-4) var(--space-4);
+  border: 1px solid var(--color-smoke);
+  border-radius: var(--radius-card);
+}
+
+.flow__shell {
+  position: relative;
+  padding: 28px var(--space-3) var(--space-3);
+  border: 1px dashed var(--color-accent);
+  border-radius: 10px;
+  background: var(--color-accent-muted);
+}
+
+.flow__shell-label {
+  position: absolute;
+  top: 6px;
+  left: 10px;
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.flow__code {
+  position: relative; /* anchor for the call/response bursts on its right edge */
+  padding: var(--space-4);
+  border: var(--border);
+  border-radius: 8px;
+  background: var(--color-carbon);
+  color: var(--color-mist);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ---- Call / response burst: a pill that pops with sparks where your code meets the SDK. ---- */
+.flow__burst {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.flow__code .flow__burst {
+  left: 100%;
+}
+
+.flow__burst-text {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--weight-strong);
+  white-space: nowrap;
+  opacity: 0;
+  animation: burst-pop 4.8s ease-out var(--delay, 0s) infinite;
+}
+
+/* Each spark is a short dash rotated by --a, flying outward from the centre. */
+.flow__spark {
+  position: absolute;
+  top: 0;
+  left: -1px;
+  width: 2px;
+  height: 9px;
+  border-radius: 1px;
+  background: var(--color-accent);
+  transform-origin: 50% 0;
+  opacity: 0;
+  animation: spark 4.8s ease-out var(--delay, 0s) infinite;
+}
+
+@keyframes burst-pop {
+  0% { opacity: 0; transform: translateX(var(--bx, -50%)) scale(0.6); }
+  3% { opacity: 1; transform: translateX(var(--bx, -50%)) scale(1.15); }
+  6%, 13% { opacity: 1; transform: translateX(var(--bx, -50%)) scale(1); }
+  16.67%, 100% { opacity: 0; transform: translateX(var(--bx, -50%)) scale(1); }
+}
+
+@keyframes spark {
+  0% { opacity: 0; transform: rotate(var(--a)) translateY(3px) scaleY(0.3); }
+  2% { opacity: 1; }
+  11%, 100% { opacity: 0; transform: rotate(var(--a)) translateY(22px) scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow__node--in,
+  .flow__node--out,
+  .flow__node--jev,
+  .flow__burst {
+    animation: none;
+  }
+
+  .flow__burst {
+    display: none;
+  }
+}
+
+/* ---------- RAG diagram (SdkFlowRag): the self-improving loop ---------- */
+/* Columns are 124px units so the SDK, the cache line and JevDB line up vertically:
+   top lane    .      code  code  sdk     to-jev jev
+   links       .      .     .     db-link .      .
+   grading     grader grader score db     .      .      */
+.flow--rag {
+  grid-template-columns: repeat(4, 124px) 140px 180px;
+  grid-template-areas:
+    ".      code   code  sdk     to-jev jev"
+    ".      .      .     db-link .      .  "
+    "grader grader score db      .      .  ";
+  justify-content: center;
+}
+
+.flow__frame--top {
+  grid-row: 1;
+  grid-column: 2 / 5;
+}
+
+.flow__frame--grader {
+  grid-row: 3;
+  grid-column: 1 / 3;
+}
+
+.flow--rag .flow__node--app {
+  grid-area: code;
+  align-self: stretch;
+  justify-content: center;
+  border-right: none;
+  border-radius: var(--radius-card) 0 0 var(--radius-card);
+}
+
+.flow--rag .flow__node--sdk {
+  grid-area: sdk;
+  position: relative; /* anchor for bursts (left edge) and the cache chip (bottom) */
+  align-self: stretch;
+  justify-content: center;
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
+  background: var(--color-obsidian);
+  color: var(--color-paper);
+}
+
+.flow--rag .flow__node--jev,
+.flow__node--db {
+  position: relative; /* anchor for the white hit flashes */
+}
+
+.flow__node--db {
+  grid-area: db;
+  justify-self: unsafe center;
+  width: 172px;
+  border-color: var(--color-accent);
+  color: var(--color-paper);
+}
+
+/* Grading lane: a smaller your code | sdk pair. */
+.flow__pair {
+  display: flex;
+}
+
+.flow__pair--grader {
+  grid-area: grader;
+}
+
+.flow__pair > .flow__node:first-child {
+  flex: 2;
+  border-right: none;
+  border-radius: var(--radius-card) 0 0 var(--radius-card);
+}
+
+.flow__node--sdk-sm {
+  flex: 1;
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
+  background: var(--color-obsidian);
+  color: var(--color-paper);
+}
+
+.flow__link--score {
+  grid-area: score;
+  padding-right: 32px; /* JevDB is wider than its column; stop the line at its edge */
+}
+
+/* SDK <-> JevDB: two vertical lines under the SDK. The right one sits under the cache. */
+.flow__link--db {
+  grid-area: db-link;
+  display: flex;
+  height: 128px;
+}
+
+.flow__link--db .flow__line {
+  width: 50%;
+}
+
+.flow__link--db .flow__line::before {
   left: 50%;
-  right: auto;
   top: 0;
   bottom: 0;
-  border-top: none;
-  border-left: 1px dashed var(--color-smoke);
+  border-left: 1px solid var(--color-smoke);
 }
 
-/* ---------- Steps ---------- */
-.steps {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-4);
-  margin: var(--space-12) 0 0;
+.flow__link--db .flow__line--async::before {
+  border-left-style: dashed;
+}
+
+.flow__link--db .flow__pulse {
+  left: 50%;
+}
+
+/* Labels beside a vertical line instead of on top of it. */
+.flow__label--left,
+.flow__label--right {
+  position: absolute;
+  top: 50%;
   padding: 0;
-  list-style: none;
+  transform: translateY(-50%);
 }
 
-.steps__item {
-  padding: var(--space-6);
+.flow__label--left { right: calc(50% + var(--space-2)); }
+.flow__label--right { left: calc(50% + var(--space-2)); }
+
+/* Cache chip sitting on the SDK's bottom edge, centred over the fetch line. */
+.flow__cache {
+  position: absolute;
+  z-index: 2;
+  bottom: 0;
+  left: 75%;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border: 1px solid var(--color-smoke);
+  border-radius: var(--radius-pill);
+  background: var(--color-carbon);
+  color: var(--color-fog);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: nowrap;
+  transform: translate(-50%, 50%);
+}
+
+/* "hit" / "miss" / "saved" pills that pop beside the cache. */
+.flow__status {
+  position: absolute;
+  top: calc(50% + 6px);
+  left: calc(100% + 6px);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  color: var(--color-on-accent);
+  font-weight: var(--weight-strong);
+  white-space: nowrap;
+  opacity: 0;
+  animation: rag-status var(--loop) ease-out var(--delay, 0s) infinite;
+}
+
+.flow__status--good { background: var(--color-good); }
+.flow__status--bad { background: var(--color-bad); }
+.flow__status--accent { background: var(--color-accent); }
+
+/* White flash overlay; one per hit so a box can flash several times per loop. */
+.flow__hit {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 1px var(--color-paper), 0 0 18px 2px rgba(255, 255, 255, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  animation: rag-hit var(--loop) ease-out var(--delay, 0s) infinite;
+}
+
+/* Two calls per loop. Loop length = --loop (9.6s × SLOW, set in SdkFlowRag.tsx); each trip is 1/12 of it. */
+.flow--rag .flow__node--jev { animation: none; }
+.flow--rag .flow__pulse { animation-duration: var(--loop); }
+.flow--rag .flow__pulse--fwd { animation-name: rag-right; }
+.flow--rag .flow__pulse--back { animation-name: rag-left; }
+.flow--rag .flow__pulse--copy-in { animation-name: rag-up; }
+.flow--rag .flow__pulse--copy-out { animation-name: rag-down; }
+.flow--rag .flow__burst-text { animation-name: rag-pop; animation-duration: var(--loop); }
+.flow--rag .flow__spark { animation-name: rag-spark; animation-duration: var(--loop); }
+
+@keyframes rag-right {
+  0% { left: 0; opacity: 0; }
+  1.5%, 8% { opacity: 1; }
+  8.33%, 100% { left: 100%; opacity: 0; }
+}
+
+@keyframes rag-left {
+  0% { left: 100%; opacity: 0; }
+  1.5%, 8% { opacity: 1; }
+  8.33%, 100% { left: 0; opacity: 0; }
+}
+
+@keyframes rag-down {
+  0% { top: 0; opacity: 0; }
+  1.5%, 8% { opacity: 1; }
+  8.33%, 100% { top: 100%; opacity: 0; }
+}
+
+@keyframes rag-up {
+  0% { top: 100%; opacity: 0; }
+  1.5%, 8% { opacity: 1; }
+  8.33%, 100% { top: 0; opacity: 0; }
+}
+
+@keyframes rag-pop {
+  0% { opacity: 0; transform: translateX(var(--bx, -50%)) scale(0.6); }
+  1.5% { opacity: 1; transform: translateX(var(--bx, -50%)) scale(1.15); }
+  3%, 6.5% { opacity: 1; transform: translateX(var(--bx, -50%)) scale(1); }
+  8.33%, 100% { opacity: 0; transform: translateX(var(--bx, -50%)) scale(1); }
+}
+
+@keyframes rag-spark {
+  0% { opacity: 0; transform: rotate(var(--a)) translateY(3px) scaleY(0.3); }
+  1% { opacity: 1; }
+  5.5%, 100% { opacity: 0; transform: rotate(var(--a)) translateY(22px) scaleY(1); }
+}
+
+@keyframes rag-status {
+  0% { opacity: 0; transform: scale(0.6); }
+  1.5% { opacity: 1; transform: scale(1.1); }
+  3%, 7% { opacity: 1; transform: scale(1); }
+  8.33%, 100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes rag-hit {
+  0% { opacity: 1; }
+  5%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow__hit,
+  .flow__status {
+    display: none;
+  }
+
+  .flow__sun-rays {
+    animation: none;
+  }
+}
+
+/* ---------- RAG cache diagrams (SdkFlowRagCache): cache as its own box ---------- */
+/* Same grid as .flow--rag. The cache, its elbows and segments are positioned inside the SDK box,
+   so all distances below are measured from the SDK (width 124px, min-height 96px).
+   Row 2 (SDK → JevDB) is exactly 128px, JevDB is 72px tall: the fetch line uses both numbers. */
+.flow--rag2 {
+  grid-template-columns: repeat(4, 124px) 140px 180px;
+  grid-template-areas:
+    ".      code   code  sdk     to-jev jev"
+    ".      .      .     db-link .      .  "
+    "grader grader score db      .      .  ";
+  justify-content: center;
+  min-width: 848px;
+}
+
+/* Filled "your app" panel, like the sketch. */
+.flow--rag2 .flow__frame {
+  background: var(--color-carbon);
+  border-color: var(--color-graphite);
+}
+
+.flow--rag2 .flow__frame--top {
+  grid-row: 1 / 3;
+  grid-column: 2 / 6;
+  margin: -44px -16px 34px;
+}
+
+.flow--rag-stack .flow__frame--top {
+  grid-column: 2 / 5;
+  margin-bottom: 38px;
+}
+
+.flow--rag2 .flow__frame--grader {
+  grid-row: 3;
+  grid-column: 1 / 3;
+  margin: -30px -12px -12px;
+}
+
+.flow--rag2 .flow__frame-label {
+  top: var(--space-2);
+  left: var(--space-2);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-button);
+  background: var(--color-obsidian);
+  color: var(--color-paper);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: var(--weight-strong);
+}
+
+.flow--rag2 .flow__node--app,
+.flow--rag2 .flow__node--sdk {
+  min-height: 96px;
+  align-self: stretch;
+  justify-content: center;
+  background: var(--color-obsidian);
+}
+
+.flow--rag2 .flow__node--app {
+  grid-area: code;
+  border-right: none;
+  border-radius: var(--radius-card) 0 0 var(--radius-card);
+}
+
+.flow--rag2 .flow__node--sdk {
+  position: relative;
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
+  color: var(--color-paper);
+}
+
+.flow--rag2 .flow__pair > .flow__node {
+  background: var(--color-obsidian);
+}
+
+.flow--rag2 .flow__node--jev {
+  position: relative;
+  animation: none;
+}
+
+.flow--rag2 .flow__node--db {
+  justify-self: unsafe center;
+  width: 172px;
+  min-height: 72px;
+  justify-content: center;
+}
+
+/* Side layout: Jev lines sit high so the lookup arrow can leave the SDK underneath them. */
+.flow--rag-side .flow__link--to-jev {
+  align-self: start;
+  padding-top: 14px;
+}
+
+/* Copies lines under the SDK (request copy, response copy), kept clear of the cache. */
+.flow--rag-side .flow__link--db {
+  padding: 0 30% 0 15%;
+}
+
+.flow--rag-stack .flow__link--db {
+  padding: 0 55% 0 5%;
+}
+
+/* The cache cylinder. */
+.flow__cyl {
+  position: absolute;
+  z-index: 1;
+  width: 76px;
+  height: 58px;
+}
+
+.flow--rag-side .flow__cyl {
+  top: calc(100% + 28px);
+  left: calc(100% + 30px);
+}
+
+.flow--rag-stack .flow__cyl {
+  top: calc(100% + 22px);
+  left: 72%;
+  transform: translateX(-50%);
+}
+
+.flow__cyl-shape {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: var(--color-obsidian);
+  stroke: var(--color-fog);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.flow__cyl-label {
+  position: absolute;
+  right: 0;
+  bottom: 12px;
+  left: 0;
+  color: var(--color-mist);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-align: center;
+}
+
+/* Elbow connectors (side layout): a box with two borders drawn, rounded at the corner. */
+.flow__elbow {
+  position: absolute;
+  border: 0 solid var(--color-smoke);
+}
+
+/* SDK right edge → right, then down into the cache top. */
+.flow__elbow--lookup {
+  top: 85%;
+  left: 100%;
+  width: 68px;
+  height: calc(15% + 28px);
+  border-top-width: 1px;
+  border-right-width: 1px;
+  border-top-right-radius: 10px;
+}
+
+/* Cache left side → left, then up into the SDK's bottom edge. */
+.flow__elbow--return {
+  top: 100%;
+  left: calc(100% - 22px);
+  width: 52px;
+  height: 57px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+  border-bottom-left-radius: 10px;
+}
+
+/* Cache bottom → down, then left into JevDB's right side (row 2 = 128px, JevDB mid = 36px). */
+.flow__elbow--fetch {
+  top: calc(100% + 86px);
+  left: calc(100% + 24px);
+  width: 44px;
+  height: 78px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  border-bottom-right-radius: 10px;
+}
+
+/* Straight segments (stack layout) on the line SDK → cache → JevDB. */
+.flow__seg {
+  position: absolute;
+  left: 72%;
+  width: 0;
+  border-left: 1px solid var(--color-smoke);
+}
+
+.flow__seg--lookup {
+  top: 100%;
+  height: 22px;
+}
+
+.flow__seg--fetch {
+  top: calc(100% + 80px);
+  height: 48px;
+}
+
+.flow__seg .flow__pulse {
+  left: 0;
+}
+
+.flow__elbow-label {
+  position: absolute;
+  top: 6px;
+  left: var(--space-2);
+  color: var(--color-ash);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.flow__elbow-label--fetch {
+  top: 30%;
+  left: calc(100% + var(--space-2));
+}
+
+.flow__elbow-label--seg {
+  top: 50%;
+  left: var(--space-2);
+  transform: translateY(-50%);
+}
+
+.flow--rag2 .flow__status {
+  top: calc(50% + 6px);
+  right: auto;
+  left: calc(100% + 6px);
+  animation-name: r2-status;
+  animation-duration: var(--loop);
+}
+
+/* Dot carrying RAG context: a bigger box holding the sun SVG (pink core + spinning rays). */
+.flow__dot--ctx {
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  background: none;
+  box-shadow: none;
+}
+
+.flow__sun {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 2px var(--color-accent));
+}
+
+.flow__sun circle {
+  fill: var(--color-accent);
+}
+
+.flow__sun-rays {
+  stroke: var(--color-accent);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  opacity: 0.6;
+  animation: sun-spin 4s linear infinite;
+}
+
+@keyframes sun-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Legend under the RAG diagrams. */
+.flow-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2) var(--space-6);
+  margin-top: var(--space-6);
+  color: var(--color-fog);
+  font-size: 13px;
+}
+
+.flow-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.flow-legend__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 10px 2px var(--color-accent);
+}
+
+.flow-legend__sun {
+  width: 20px;
+  height: 20px;
+}
+
+/* Loop length = --loop (10.4s × SLOW, set in SdkFlowRagCache.tsx). Network trip = 7.69% of it, cache trip = 2.88%. */
+.flow--rag2 .flow__dot { animation-duration: var(--loop); }
+.flow--rag2 .flow__dot--right { animation-name: r2-right; }
+.flow--rag2 .flow__dot--left { animation-name: r2-left; }
+.flow--rag2 .flow__dot--down { animation-name: r2-down; }
+.flow--rag2 .flow__dot--up { animation-name: r2-up; }
+.flow--rag2 .flow__dot--fdown { animation-name: r2-fdown; }
+.flow--rag2 .flow__dot--fup { animation-name: r2-fup; }
+.flow--rag2 .flow__dot--frd { animation-name: r2-frd; }
+.flow--rag2 .flow__dot--flu { animation-name: r2-flu; }
+.flow--rag2 .flow__dot--dl { animation-name: r2-dl; }
+.flow--rag2 .flow__dot--ru { animation-name: r2-ru; }
+.flow--rag2 .flow__burst-text { animation-name: r2-pop; animation-duration: var(--loop); }
+.flow--rag2 .flow__spark { animation-name: r2-spark; animation-duration: var(--loop); }
+.flow--rag2 .flow__hit { animation-name: r2-hit; animation-duration: var(--loop); }
+
+@keyframes r2-right {
+  0% { left: 0; opacity: 0; }
+  1%, 7.4% { opacity: 1; }
+  7.69%, 100% { left: 100%; opacity: 0; }
+}
+
+@keyframes r2-left {
+  0% { left: 100%; opacity: 0; }
+  1%, 7.4% { opacity: 1; }
+  7.69%, 100% { left: 0; opacity: 0; }
+}
+
+@keyframes r2-down {
+  0% { top: 0; opacity: 0; }
+  1%, 7.4% { opacity: 1; }
+  7.69%, 100% { top: 100%; opacity: 0; }
+}
+
+@keyframes r2-up {
+  0% { top: 100%; opacity: 0; }
+  1%, 7.4% { opacity: 1; }
+  7.69%, 100% { top: 0; opacity: 0; }
+}
+
+/* Elbows: first leg in the first half of the trip, second leg in the second half. */
+@keyframes r2-dl {
+  0% { left: 100%; top: 0; opacity: 0; }
+  1% { opacity: 1; }
+  3.85% { left: 100%; top: 100%; }
+  7.4% { opacity: 1; }
+  7.69%, 100% { left: 0; top: 100%; opacity: 0; }
+}
+
+@keyframes r2-ru {
+  0% { left: 0; top: 100%; opacity: 0; }
+  1% { opacity: 1; }
+  3.85% { left: 100%; top: 100%; }
+  7.4% { opacity: 1; }
+  7.69%, 100% { left: 100%; top: 0; opacity: 0; }
+}
+
+/* Fast cache trips (SDK ⇄ cache): 0.3 of the 10.4 base loop = 2.88%. */
+@keyframes r2-fdown {
+  0% { top: 0; opacity: 0; }
+  0.4%, 2.7% { opacity: 1; }
+  2.88%, 100% { top: 100%; opacity: 0; }
+}
+
+@keyframes r2-fup {
+  0% { top: 100%; opacity: 0; }
+  0.4%, 2.7% { opacity: 1; }
+  2.88%, 100% { top: 0; opacity: 0; }
+}
+
+@keyframes r2-frd {
+  0% { left: 0; top: 0; opacity: 0; }
+  0.4% { opacity: 1; }
+  1.44% { left: 100%; top: 0; }
+  2.7% { opacity: 1; }
+  2.88%, 100% { left: 100%; top: 100%; opacity: 0; }
+}
+
+@keyframes r2-flu {
+  0% { left: 100%; top: 100%; opacity: 0; }
+  0.4% { opacity: 1; }
+  1.44% { left: 0; top: 100%; }
+  2.7% { opacity: 1; }
+  2.88%, 100% { left: 0; top: 0; opacity: 0; }
+}
+
+@keyframes r2-pop {
+  0% { opacity: 0; transform: translateX(var(--bx, -50%)) scale(0.6); }
+  1.2% { opacity: 1; transform: translateX(var(--bx, -50%)) scale(1.15); }
+  2.4%, 5.2% { opacity: 1; transform: translateX(var(--bx, -50%)) scale(1); }
+  6.67%, 100% { opacity: 0; transform: translateX(var(--bx, -50%)) scale(1); }
+}
+
+@keyframes r2-spark {
+  0% { opacity: 0; transform: rotate(var(--a)) translateY(3px) scaleY(0.3); }
+  0.8% { opacity: 1; }
+  4.4%, 100% { opacity: 0; transform: rotate(var(--a)) translateY(22px) scaleY(1); }
+}
+
+@keyframes r2-status {
+  0% { opacity: 0; transform: scale(0.6); }
+  1.2% { opacity: 1; transform: scale(1.1); }
+  2.4%, 5.6% { opacity: 1; transform: scale(1); }
+  6.67%, 100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes r2-hit {
+  0% { opacity: 1; }
+  4%, 100% { opacity: 0; }
+}
+
+/* ---------- Timeline player under the RAG diagrams (LoopPlayer) ---------- */
+/* Card surface, hairline borders, accent only for what's active. Motion instead of glow:
+   the playhead pings while playing, ticks light up as they pass, captions slide in. */
+.player {
+  max-width: 720px;
+  margin: var(--space-6) auto 0;
+  padding: var(--space-4) var(--space-5);
   border: var(--border);
   border-radius: var(--radius-card);
   background: var(--color-carbon);
 }
 
-.steps__n {
+.player__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.player__icon-btn {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: var(--border);
+  border-radius: var(--radius-button);
+  background: transparent;
+  color: var(--color-paper);
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.player__icon-btn:hover,
+.player__reset:hover {
+  border-color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.player__icon-btn:focus-visible,
+.player__reset:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.player__timeline {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding-top: 18px; /* room for the segment labels */
+}
+
+.player__segments {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 14px;
+}
+
+.player__segment {
+  position: absolute;
+  top: 0;
+  overflow: hidden;
+  padding-left: 6px;
+  border-left: 1px solid var(--color-smoke);
   color: var(--color-ash);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  line-height: 14px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: color 200ms ease, border-color 200ms ease;
+}
+
+.player__segment--active {
+  border-left-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.player__track {
+  position: relative;
+  height: 2px;
+  margin: 7px 0;
+  border-radius: 1px;
+  background: var(--color-graphite);
+}
+
+.player__fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  border-radius: 1px;
+  background: var(--color-accent);
+}
+
+/* One tick per step. */
+.player__tick {
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border: 1px solid var(--color-smoke);
+  border-radius: 50%;
+  background: var(--color-carbon);
+  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+
+.player__tick--passed {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}
+
+.player__tick--current {
+  transform: scale(1.5);
+}
+
+/* Playhead: a hollow accent ring with a ping that repeats while playing. */
+.player__head {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 2px solid var(--color-accent);
+  border-radius: 50%;
+  background: var(--color-void);
+  pointer-events: none;
+}
+
+.player__head::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border: 1px solid var(--color-accent);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.player--playing .player__head::after {
+  animation: player-ping 1.6s ease-out infinite;
+}
+
+@keyframes player-ping {
+  0% { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.4); }
+}
+
+/* The real (invisible) range input on top: drag, click, arrow keys. */
+.player__input {
+  position: absolute;
+  right: 0;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.player__input:focus-visible ~ .player__track .player__head,
+.player__timeline:has(.player__input:focus-visible) .player__head {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.player__clock {
+  flex: none;
+  width: 44px;
+  color: var(--color-fog);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: right;
+}
+
+.player__reset {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border);
+  border-radius: var(--radius-button);
+  background: transparent;
+  color: var(--color-mist);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.player__caption {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-height: 3em; /* two lines, so the card doesn't jump between steps */
+  margin: var(--space-4) 0 0;
+  padding-top: var(--space-3);
+  border-top: var(--border);
+  color: var(--color-mist);
+  font-size: 14px;
+  line-height: 1.5;
+  animation: player-caption-in 240ms ease-out;
+}
+
+.player__count {
+  flex: none;
+  padding: 0 6px;
+  border-radius: var(--radius-badge);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-accent);
   font-family: var(--font-mono);
   font-size: 12px;
 }
 
-.steps__title {
-  margin: var(--space-4) 0 0;
-  color: var(--color-paper);
-  font-size: 16px;
-  font-weight: var(--weight-medium);
+@keyframes player-caption-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
 }
 
-.steps__body {
-  margin: var(--space-2) 0 0;
-  color: var(--color-fog);
-  font-size: 14px;
-  line-height: 1.6;
+@media (max-width: 640px) {
+  .player {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .player__row {
+    gap: var(--space-3);
+  }
+
+  .player__clock {
+    display: none;
+  }
+
+  .player__reset {
+    padding: var(--space-2);
+    font-size: 0; /* icon only */
+    gap: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .player--playing .player__head::after,
+  .player__caption {
+    animation: none;
+  }
+}
+
+.flow-reset {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
+.flow__caption {
+  margin: var(--space-6) 0 0;
+  color: var(--color-ash);
+  font-size: 13px;
+  text-align: center;
 }
 
 /* ---------- Checklist ---------- */
@@ -698,7 +1950,6 @@ code,
 /* ---------- Medium screens ---------- */
 @media (max-width: 900px) {
   .split,
-  .steps,
   .principles {
     grid-template-columns: 1fr;
   }
@@ -713,13 +1964,44 @@ code,
     border-top: var(--border);
   }
 
-  /* Flow becomes a vertical list: app, proxy, jev, then the async branch to Postgres. */
+  /* Flow turns sideways: app on top, Jev at the bottom, JevDB copies left and right of the SDK. */
   .flow {
-    grid-template-columns: 1fr;
-    grid-template-areas: "app" "a" "proxy" "b" "jev" "down" "db";
+    grid-template-columns: minmax(0, 1fr) 32px minmax(0, 1.2fr) 32px minmax(0, 1fr);
+    grid-template-areas:
+      ".  .  app    .    .  "
+      ".  .  to-sdk .    .  "
+      "in up sdk    down out"
+      ".  .  to-jev .    .  "
+      ".  .  jev    .    .  ";
   }
 
-  .flow__link::before {
+  .flow--nested .flow__link--copy,
+  .flow--joined .flow__link--copy {
+    height: auto;
+  }
+
+  .flow__frame {
+    grid-row: 1 / 4;
+    grid-column: 3;
+    margin: -36px -8px -12px;
+  }
+
+  .flow__node {
+    padding: var(--space-3) var(--space-2);
+  }
+
+  .flow__link--main {
+    flex-direction: row;
+    gap: 0;
+    padding: 0;
+  }
+
+  .flow__link--main .flow__line {
+    width: 50%;
+    height: 64px;
+  }
+
+  .flow__link--main .flow__line::before {
     left: 50%;
     right: auto;
     top: 0;
@@ -728,9 +2010,42 @@ code,
     border-left: 1px solid var(--color-smoke);
   }
 
-  .flow__link--down::before {
-    border-left-style: dashed;
+  .flow__link--main .flow__pulse {
+    top: 0;
+    left: 50%;
   }
+
+  .flow__link--copy {
+    height: auto;
+  }
+
+  .flow__link--copy .flow__line {
+    height: 20px;
+  }
+
+  .flow__link--copy .flow__line::before {
+    left: 0;
+    right: 0;
+    top: 50%;
+    bottom: auto;
+    border-left: none;
+    border-top: 1px dashed var(--color-smoke);
+  }
+
+  .flow__link--copy .flow__pulse {
+    top: 50%;
+    left: 0;
+  }
+
+  /* Too narrow for line labels; the boxes and the pulses tell the story. */
+  .flow__label {
+    display: none;
+  }
+
+  .flow__pulse--fwd { animation-name: move-down; }
+  .flow__pulse--back { animation-name: move-up; }
+  .flow__pulse--copy-in { animation-name: move-left; }
+  .flow__pulse--copy-out { animation-name: move-right; }
 }
 
 /* ---------- Small screens ---------- */
@@ -759,5 +2074,360 @@ code,
 
   .preview__tabs {
     display: none;
+  }
+}
+
+/* Joined + wrapped diagrams turned sideways for narrow screens. */
+@media (max-width: 900px) {
+  .flow--joined {
+    grid-template-columns: minmax(0, 1fr) 32px minmax(0, 1.2fr) 32px minmax(0, 1fr);
+    grid-template-areas:
+      ".  .  app    .    .  "
+      "in up sdk    down out"
+      ".  .  to-jev .    .  "
+      ".  .  jev    .    .  ";
+  }
+
+  .flow--joined .flow__frame {
+    grid-row: 1 / 3;
+    grid-column: 3;
+  }
+
+  .flow--joined .flow__node--app {
+    border-right: var(--border);
+    border-bottom: none;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+  }
+
+  .flow--joined .flow__node--sdk {
+    border-radius: 0 0 var(--radius-card) var(--radius-card);
+    padding-block: var(--space-2);
+  }
+
+  /* On mobile "small" means short: your code gets the height, the SDK is a thin strip. */
+  .flow--joined .flow__node--app {
+    padding-block: var(--space-6);
+  }
+
+  .flow--joined .flow__node--in,
+  .flow--joined .flow__node--out {
+    justify-self: stretch;
+    width: auto;
+  }
+
+  /* Burst sits on the seam between the two halves: the SDK's top edge. */
+  .flow--joined .flow__burst {
+    top: 0;
+    left: 50%;
+  }
+
+  .flow--wrapped {
+    grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1.5fr) 24px minmax(0, 1fr);
+    grid-template-areas:
+      "in up   app    down out"
+      ".  .    to-jev .    .  "
+      ".  .    jev    .    .  ";
+  }
+
+  .flow--wrapped .flow__node--in,
+  .flow--wrapped .flow__node--out {
+    justify-self: stretch;
+    width: auto;
+  }
+
+  .flow__app {
+    padding: 28px var(--space-2) var(--space-2);
+  }
+
+  .flow__shell {
+    padding: 24px 6px 6px;
+  }
+
+  .flow__code {
+    padding: var(--space-3) var(--space-1);
+    font-size: 12px;
+  }
+
+  /* Pill sits beside the seam instead of on top of the text. */
+  .flow__burst-text {
+    --bx: 0;
+    bottom: -10px;
+    left: 20px;
+  }
+
+  /* The request leaves downward on mobile, so burst on the code's bottom edge. */
+  .flow__code .flow__burst {
+    top: 100%;
+    left: 50%;
+  }
+}
+
+/* RAG diagram on narrow screens: your app on the left, JevDB on the right, Jev below your app,
+   grading below JevDB. */
+@media (max-width: 900px) {
+  .flow--rag {
+    grid-template-columns: minmax(0, 1.3fr) 40px minmax(0, 1fr);
+    grid-template-areas:
+      "code   .       .     "
+      "sdk    db-link db    "
+      "to-jev .       score "
+      "jev    .       grader";
+  }
+
+  .flow__frame--top {
+    grid-row: 1 / 3;
+    grid-column: 1;
+  }
+
+  .flow__frame--grader {
+    grid-row: 4;
+    grid-column: 3;
+    margin-top: -30px;
+  }
+
+  /* Taller vertical links so the score line clears the grading outline. */
+  .flow--rag .flow__link--main .flow__line {
+    height: 88px;
+  }
+
+  .flow--rag .flow__node--app {
+    border-right: var(--border);
+    border-bottom: none;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+  }
+
+  .flow--rag .flow__node--sdk {
+    border-radius: 0 0 var(--radius-card) var(--radius-card);
+  }
+
+  .flow--rag .flow__burst {
+    top: 0;
+    left: 50%;
+  }
+
+  .flow__node--db {
+    justify-self: stretch;
+    width: auto;
+  }
+
+  /* Copies (top) and the miss fetch (bottom) run sideways to JevDB. */
+  .flow__link--db {
+    flex-direction: column;
+    height: auto;
+    align-self: stretch;
+  }
+
+  .flow__link--db .flow__line {
+    width: 100%;
+    height: 50%;
+  }
+
+  .flow__link--db .flow__line::before {
+    left: 0;
+    right: 0;
+    top: 50%;
+    bottom: auto;
+    border-left: none;
+    border-top: 1px solid var(--color-smoke);
+  }
+
+  .flow__link--db .flow__line--async::before {
+    border-top-style: dashed;
+  }
+
+  .flow__link--db .flow__pulse {
+    top: 50%;
+    left: 0;
+  }
+
+  .flow--rag .flow__link--db .flow__pulse--copy-out { animation-name: rag-right; }
+  .flow--rag .flow__link--db .flow__pulse--copy-in { animation-name: rag-left; }
+  .flow--rag .flow__link--to-jev .flow__pulse--fwd { animation-name: rag-down; }
+  .flow--rag .flow__link--to-jev .flow__pulse--back { animation-name: rag-up; }
+  .flow--rag .flow__link--score .flow__pulse--fwd { animation-name: rag-up; }
+
+  .flow--rag .flow__link--score {
+    justify-content: center;
+  }
+
+  /* Cache chip moves to the SDK's right edge, on the fetch line. */
+  .flow__cache {
+    top: 75%;
+    bottom: auto;
+    left: 100%;
+    transform: translate(-50%, -50%);
+  }
+
+  .flow__status {
+    top: calc(100% + 4px);
+    left: auto;
+    right: 0;
+  }
+
+  .flow__pair > .flow__node {
+    padding-inline: var(--space-1);
+    font-size: 12px;
+  }
+}
+
+/* RAG cache diagrams keep their desktop layout on narrow screens and scroll sideways inside
+   .flow-scroll, so undo the generic narrow-screen flow rules for them. */
+@media (max-width: 900px) {
+  /* Only narrow screens scroll sideways; padding keeps outlines and glows from being clipped. */
+  .flow-scroll {
+    overflow-x: auto;
+    margin-inline: calc(-1 * var(--space-4));
+    padding: 0 var(--space-4) var(--space-6);
+  }
+
+  .flow--rag2 {
+    grid-template-columns: repeat(4, 124px) 140px 180px;
+    grid-template-areas:
+      ".      code   code  sdk     to-jev jev"
+      ".      .      .     db-link .      .  "
+      "grader grader score db      .      .  ";
+  }
+
+  .flow--rag2 .flow__node {
+    padding: var(--space-4);
+  }
+
+  .flow--rag2 .flow__node--app {
+    border-right: none;
+    border-bottom: var(--border);
+    border-radius: var(--radius-card) 0 0 var(--radius-card);
+  }
+
+  .flow--rag2 .flow__node--sdk {
+    border-radius: 0 var(--radius-card) var(--radius-card) 0;
+  }
+
+  .flow--rag2 .flow__link--main {
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: 0 var(--space-2);
+  }
+
+  .flow--rag2 .flow__link--main .flow__line {
+    width: auto;
+    height: 20px;
+  }
+
+  .flow--rag2 .flow__link--main .flow__line::before {
+    top: 50%;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    border-left: none;
+    border-top: 1px solid var(--color-smoke);
+  }
+
+  .flow--rag2 .flow__link--main .flow__line--async::before {
+    border-top-style: dashed;
+  }
+
+  .flow--rag2 .flow__link--main .flow__pulse {
+    top: 50%;
+  }
+
+  .flow--rag2 .flow__label {
+    display: inline;
+  }
+
+  .flow--rag2 .flow__burst {
+    top: 50%;
+    left: 0;
+  }
+
+  .flow--rag2 .flow__burst-text {
+    --bx: -50%;
+    bottom: 12px;
+    left: 0;
+  }
+
+  .flow--rag2 .flow__node--db {
+    justify-self: unsafe center;
+    width: 172px;
+  }
+
+  .flow--rag2 .flow__link--db {
+    flex-direction: row;
+    align-self: auto;
+    height: 128px;
+  }
+
+  .flow--rag2 .flow__link--db .flow__line {
+    width: 50%;
+    height: auto;
+  }
+
+  .flow--rag2 .flow__link--db .flow__line::before {
+    top: 0;
+    right: auto;
+    bottom: 0;
+    left: 50%;
+    border-top: none;
+    border-left: 1px dashed var(--color-smoke);
+  }
+
+  .flow--rag2 .flow__link--db .flow__pulse {
+    top: 0;
+    left: 50%;
+  }
+
+  .flow--rag2 .flow__pair > .flow__node {
+    padding-inline: var(--space-4);
+    font-size: 13px;
+  }
+}
+
+/* One-JevDB C on narrow screens: your code over the SDK, JevDB to the right, Jev below. */
+@media (max-width: 900px) {
+  .flow--one-db {
+    grid-template-columns: minmax(0, 1.2fr) 40px minmax(0, 1fr);
+    grid-template-areas:
+      "app    .       .  "
+      "sdk    db-link db "
+      "to-jev .       .  "
+      "jev    .       .  ";
+  }
+
+  .flow--one-db .flow__frame {
+    grid-row: 1 / 3;
+    grid-column: 1;
+  }
+
+  .flow--one-db .flow__node--db {
+    justify-self: stretch;
+    width: auto;
+  }
+
+  .flow--one-db .flow__link--db {
+    flex-direction: column;
+    align-self: stretch;
+    height: auto;
+  }
+
+  .flow--one-db .flow__link--db .flow__line {
+    width: 100%;
+    height: 50%;
+  }
+
+  .flow--one-db .flow__link--db .flow__line::before {
+    top: 50%;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    border-left: none;
+    border-top: 1px dashed var(--color-smoke);
+  }
+
+  .flow--one-db .flow__link--db .flow__pulse {
+    top: 50%;
+    left: 0;
+  }
+
+  .flow--one-db .flow__link--db .flow__pulse--copy-out {
+    animation-name: move-right;
   }
 }

@@ -16,9 +16,10 @@ export function Hero() {
       </h1>
 
       <p className="hero__sub">
-        A self-hosted proxy between your app and the Jev API. Every request and
-        response lands in Postgres. Browse them in a table, then grade each
-        decision against what actually happened.
+        Call Jev through our SDK and every request and response is saved to your
+        database. You make the calls, so your Jev API key never leaves your app.
+        Grade each answer, and let those scores feed your best past decisions back
+        into new calls with Jev RAG.
       </p>
 
       <div className="hero__actions">

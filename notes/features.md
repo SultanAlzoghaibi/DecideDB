@@ -30,7 +30,9 @@
 - [ ] Configurable retention
 - [ ] Encryption at rest for `state`
 
-## Experimental (opt-in, default off)
+## Version 2 (see notes/roadmap.md): experimental, opt-in, default off
 - [ ] Retrieve best-graded past examples
 - [ ] Jev judges relevance
-- [ ] Inject into `state` as few-shot context
+- [ ] Inject into `state` or the matching criteria `examples` as few-shot context
+- [ ] A/B test: retrieval on vs off
+- [ ] A/B test: question versions

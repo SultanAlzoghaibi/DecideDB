@@ -19,7 +19,7 @@
 
 Jev itself judges which past graded examples are relevant, and those get injected into a new request's `state` as few-shot context, aiming to nudge future accuracy.
 
-This is **explicitly unproven**. TypeSafe's own docs warn that `state` is steerable by design, and academic literature plus prior art show few-shot injection is unstable — it can help, hurt, or do nothing. Ship it as an optional, clearly-labeled experimental toggle, never the headline feature. At launch, frame it as a "help me test this" call for ML-minded collaborators.
+This is **explicitly unproven**. TypeSafe's own docs warn that `state` is steerable by design, and academic literature plus prior art show few-shot injection is unstable — it can help, hurt, or do nothing. Ship it as an optional, clearly-labeled experimental toggle, never the headline feature. Design: examples are cached inside the SDK (like [Langfuse prompt caching](https://langfuse.com/docs/prompt-management/features/caching)) so retrieval never adds a network hop to the Jev call. See `notes/retrieval.md`. At launch, frame it as a "help me test this" call for ML-minded collaborators.
 
 ## Jev API mechanics
 

@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 - Answer questions concisely: short direct answer first, minimal detail, no long surveys.
-- Project context: see README.md. Feature checklist: notes/features.md. DB design: notes/db-schema.md.
+- Project context: see README.md. Feature checklist: notes/features.md. DB design: notes/db-schema.md. Roadmap (v1 = see decisions, v2 = self-improving: score-based retrieval + A/B tests): notes/roadmap.md. Retrieval design (SDK-side cache, Langfuse-style): notes/retrieval.md.
 - Jev is the core of the whole product. Jev API docs: https://docs.typesafe.ai/introduction — check them for request/response shapes before designing schema, SDKs, or UI. Machine-readable: https://docs.typesafe.ai/llms.txt (index), https://docs.typesafe.ai/api.md (HTTP API ref); any page + `.md`.
 
 ## Bun for everything
