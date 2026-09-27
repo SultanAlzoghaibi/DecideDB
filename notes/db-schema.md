@@ -18,7 +18,7 @@ Source: https://docs.typesafe.ai/api.md
 **Grade per answer**, not per request (each question = one decision).
 
 ## Tables
-SQL: `backend/migrations/0001_input.sql` (request side) + `backend/migrations/0002_response.sql` (response + grades) — fully relational (every JSON field -> rows).
+SQL: `db/migrations/0001_input.sql` (request side) + `db/migrations/0002_response.sql` (response + grades) — fully relational (every JSON field -> rows).
 
 ```
 states ──< requests ──< answers >── question_versions >── instructions

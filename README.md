@@ -1,11 +1,11 @@
 # JevDB
 
-> The "Supabase for Jev" — a self-hosted, open-source middleware that sits between your app and TypeSafe's Jev API. It logs every request/response to Postgres, gives you a web UI to browse them, and lets you grade past decisions based on real outcomes.
+> The "Supabase for Jev" — a self-hosted, open-source logging layer for TypeSafe's Jev API. A tiny SDK (JS or Python) sends every request/response to JevDB in the background, where it lands in Postgres, shows up in a web UI, and can be graded against real outcomes.
 
 ## Why
 
 - Jev has zero built-in memory or self-serve request history — every call is stateless and disappears the moment it returns.
-- A vibecoder building fast doesn't want to design a Postgres schema, write a logging proxy, and build a review UI from scratch before they can even see what their AI decisions are doing.
+- A vibecoder building fast doesn't want to design a Postgres schema, write logging code, and build a review UI from scratch before they can even see what their AI decisions are doing.
 - Same reason people reach for Supabase instead of standing up their own Postgres + auth + dashboard: the underlying tech (Postgres) is not hard, but nobody wants to assemble the boring plumbing themselves when it's already sitting there ready to `docker run`.
 - Postgres is cheap and well-understood — no exotic infra, no per-seat SaaS logging bill, self-hostable for basically free. That matters to someone prototyping fast who doesn't want to burn budget on observability tooling.
 
@@ -33,23 +33,25 @@ This is **explicitly unproven**. TypeSafe's own docs warn that `state` is steera
 ## Architecture (decided)
 
 ```
-your app ──Jev calls + API key──▶ Rust/Axum proxy ──▶ Jev API
-                                      │ (async queue)
-browser ──▶ web UI ──────────────────▶│
-                                      ▼
-                                   Postgres
+your app ──Jev call──────────────────────────▶ Jev API
+   │ jevdb.log(request, response)  (background, never blocks)
+   ▼
+JevDB (Next.js on Bun) ── POST /ingest/response ──▶ Postgres
+   ▲
+browser ── dashboard + /api/* ─┘
 ```
 
-- **Postgres**, not a time-series DB. Normalized columns for hot-query fields (confidence, answer, timestamp) alongside raw JSONB for the full payload.
-- **Rust/Axum proxy.** Logging is async via a queue so DB writes never add latency to the Jev round-trip.
+- **SDK, not a proxy.** Your app keeps calling Jev directly, so JevDB can never add latency or downtime to a Jev call. The JS (`sdk/js`) and Python (`sdk/python`) SDKs queue each call and POST it to `/ingest/response` in the background.
+- **One Next.js app** (`web/`), run with Bun, serves the landing/docs, the dashboard, SDK ingest and the dashboard API.
+- **Postgres**, not a time-series DB. Normalized columns for hot-query fields (confidence, answer, timestamp) alongside raw JSONB for the full payload. SQL lives in `db/migrations/`.
 - **Multi-tenancy** via `project_id` + Postgres Row Level Security (RLS) as a database-level backstop beneath app-level checks. Tenant context is set fresh per-transaction so it stays safe with connection pooling.
 - **Hashed, rotatable API keys.**
 - **PgBouncer** connection pooling.
 - **Time-based table partitioning** + configurable retention.
 - **Encryption at rest** for `state`.
-- **Region:** AWS `us-east-1` (latency tests point to Jev being hosted there). Run the proxy + Postgres in the same region.
-- **Deploy shape:** single VM — Postgres + 2–3 stateless async pods, via Docker Compose. Reasonable weekend scope.
-- **Web UI:** Bun web server that calls the Rust API. The Rust API is the only thing that touches Postgres and Jev; keep business logic there, not in the web layer.
+- **Region:** us-west (Oregon). Latency tests put Jev there (Cloudflare edge → origin ≈ 15–25 ms from Vancouver). Run the server + Postgres in the same region.
+- **Hosting:** Cloud Run (Next.js `standalone` build) + private Cloud SQL Postgres (no public IP). `docker compose up` for local dev.
+- Only server code in `web/` (route handlers + `web/lib/`) touches Postgres; no business logic in React components.
 
 ## Competitive landscape
 
@@ -73,9 +75,9 @@ LLM-world analogues worth studying: **Helicone** (proxy-based logging), **Langfu
 
 ## Notes for AI assistants
 
-- **The author is learning** while building this: Rust, backend architecture, Postgres, and web infra. The goal is to build a vibecoder-friendly, Supabase-style tool *and* understand how it works. Explain the "why" behind choices, introduce new concepts briefly, and prefer simple, idiomatic solutions over clever ones.
+- **The author is learning** while building this: TypeScript backends, Next.js, Postgres, and web infra. Everything JS/TS runs on Bun. The goal is to build a vibecoder-friendly, Supabase-style tool *and* understand how it works. Explain the "why" behind choices, introduce new concepts briefly, and prefer simple, idiomatic solutions over clever ones.
 - Core value = logging + web UI + grading. Prioritize these over the retrieval feature.
 - Keep setup friction near zero: `docker compose up` should be enough to get started.
 - Storage is Postgres. Avoid exotic infra or paid dependencies.
 - Retrieval must stay opt-in and default off.
-- Suggested build order: Rust proxy + logging (hardcoded API key) → web UI table → grading → real API keys/multi-tenancy → experimental retrieval.
+- Suggested build order: SDK + `/ingest/response` + logging (hardcoded API key) → web UI table → grading → real API keys/multi-tenancy → experimental retrieval.

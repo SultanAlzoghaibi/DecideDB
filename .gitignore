@@ -1,20 +1,30 @@
-# Rust build output
-target/
-**/*.rs.bk
-*.pdb
+# One .gitignore for the whole repo (web/, sdk/js/, sdk/python/).
 
-# IDE
+# Dependencies
+node_modules/
+.venv/
+
+# Build output
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+next-env.d.ts
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Env / secrets (commit .env.example with fake values only)
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# IDE / OS
 .idea/
 .vscode/
 *.iml
-
-# OS
 .DS_Store
-
-# Env / secrets
-.env
-.env.*
-
-# Frontend
-node_modules/
-dist/

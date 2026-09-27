@@ -1,11 +1,12 @@
 # JevDB Features
 
 ## Base (MVP)
-- [ ] Rust/Axum proxy → forwards calls to Jev
-- [ ] Log request/response to Postgres (state, questions, answers, confidence, latency)
-- [ ] Async logging queue (no added latency)
+- [x] JS SDK (`sdk/js`) → background POST to `/ingest/response`
+- [x] Python SDK (`sdk/python`) → background POST to `/ingest/response`
+- [ ] `/ingest/response` writes request/response to Postgres (state, questions, answers, confidence, latency)
+- [ ] Hosted JevDB URL (SDK default is localhost for now)
 - [ ] Single hardcoded API key
-- [ ] Docker Compose (api + postgres)
+- [ ] Docker Compose (web + postgres)
 
 ## Web UI
 - [ ] Decisions table (newest first, paginated)
