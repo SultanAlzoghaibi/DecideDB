@@ -32,6 +32,10 @@ export function Burst({ text, delay }: { text: string; delay: string }) {
         <i key={a} className="flow__spark" style={vars({ "--a": `${a}deg` })} />
       ))}
       <span className="flow__burst-text">{text}</span>
+      {/* With the sparks, a tiny arrow shows the direction: call → sdk, response ← sdk. */}
+      <svg className={`flow__stub flow__stub--${text.startsWith("call") ? "right" : "left"}`} viewBox="0 0 14 10" aria-hidden="true">
+        <path d="M1 5h11M8 1.5 12 5 8 8.5" />
+      </svg>
     </span>
   );
 }
@@ -85,7 +89,8 @@ const BASIC_SEGMENTS: Segment[] = [
 ];
 
 const scaleSteps = (k: number) => BASIC_STEPS.map((s) => ({ ...s, t: s.t * k }));
-const scaleSegments = (k: number) => BASIC_SEGMENTS.map((s) => ({ ...s, from: s.from * k, to: s.to * k }));
+const scaleSegments = (k: number, end = 4.8) =>
+  BASIC_SEGMENTS.map((s) => ({ ...s, from: s.from * k, to: Math.min(s.to, end) * k }));
 
 const LABEL =
   "Your app calls the Jev API through the JevDB SDK. On the way out, the SDK sends a copy of the request to JevDB; on the way back, it sends a copy of the response. Both copies are sent in the background without blocking your app.";
@@ -172,9 +177,6 @@ function Flow({ variant }: { variant: Variant }) {
         <JevDBNode side="out" />
       </div>
 
-      <p className="flow__caption">
-        Solid: your normal Jev call. Dashed: copies sent to JevDB in the background, never blocking.
-      </p>
     </>
   );
 
@@ -190,14 +192,15 @@ function Flow({ variant }: { variant: Variant }) {
 // C with a single JevDB under the SDK: both copies (request, then response) drop into it.
 // This is the basic diagram on the landing page.
 // ONE_DB_SLOW stretches C's timing for this version only; CSS reads the loop length from --loop.
+// The loop is 3.4 base seconds (not C's 4.8), so there's only a short rest after the response copy lands.
 const ONE_DB_SLOW = 2;
 const slow = (d: string) => `${+(parseFloat(d) * ONE_DB_SLOW).toFixed(2)}s`;
 
 export function SdkFlowOneDb() {
   const t = { send: slow(TIMING.touch.send), back: slow(TIMING.touch.back), ret: slow(TIMING.touch.ret) };
   return (
-    <LoopPlayer loop={4.8 * ONE_DB_SLOW} steps={scaleSteps(ONE_DB_SLOW)} segments={scaleSegments(ONE_DB_SLOW)}>
-      <div className="flow flow--joined flow--one-db" role="img" aria-label={LABEL} style={vars({ "--loop": slow("4.8s"), "--ping": slow("0.8s") })}>
+    <LoopPlayer loop={3.4 * ONE_DB_SLOW} steps={scaleSteps(ONE_DB_SLOW)} segments={scaleSegments(ONE_DB_SLOW, 3.4)}>
+      <div className="flow flow--joined flow--one-db" role="img" aria-label={LABEL} style={vars({ "--loop": slow("3.4s"), "--ping": slow("0.8s") })}>
         <div className="flow__frame">
           <span className="flow__frame-label">your app</span>
         </div>
@@ -248,9 +251,6 @@ export function SdkFlowOneDb() {
         </div>
       </div>
 
-      <p className="flow__caption">
-        Solid: your normal Jev call. Dashed: copies sent to JevDB in the background, never blocking.
-      </p>
     </LoopPlayer>
   );
 }

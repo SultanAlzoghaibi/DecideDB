@@ -22,7 +22,12 @@ const VERSIONS = [
 
 export default function DiagramsPage() {
   return (
-    <main className="container">
+    <main className="container review-page">
+      <p className="section">
+        <a className="btn btn--ghost" href="/diagrams/json-to-table">
+          JSON → tables diagrams →
+        </a>
+      </p>
       {VERSIONS.map(({ name, Diagram }) => (
         <section key={name} className="section">
           <p className="eyebrow">{name}</p>

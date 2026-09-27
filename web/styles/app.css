@@ -713,27 +713,83 @@ code,
   height: 112px;
 }
 
-/* White flash on the single JevDB when a copy lands. */
-.flow--one-db .flow__hit {
-  animation-name: node-flash;
-}
-
-/* Slowed version of C: every animation runs on --loop (set in SdkFlowOneDb). */
+/* C2 runs on its own 3.4-base-second loop (--loop, set in SdkFlowOneDb), so it has its own
+   keyframes: same moves as C, percentages recomputed (a 0.8 trip = 23.5% of the loop). */
 .flow--one-db .flow__pulse,
 .flow--one-db .flow__burst-text,
 .flow--one-db .flow__spark,
-.flow--one-db .flow__node--jev {
+.flow--one-db .flow__stub,
+.flow--one-db .flow__node--jev,
+.flow--one-db .flow__hit {
   animation-duration: var(--loop);
+}
+
+.flow--one-db .flow__pulse--fwd { animation-name: od-right; }
+.flow--one-db .flow__pulse--back { animation-name: od-left; }
+.flow--one-db .flow__pulse--copy-out { animation-name: od-down; }
+.flow--one-db .flow__burst-text { animation-name: od-pop; }
+.flow--one-db .flow__spark { animation-name: od-spark; }
+.flow--one-db .flow__stub { animation-name: od-stub; }
+.flow--one-db .flow__node--jev { animation-name: od-hit; }
+.flow--one-db .flow__hit { animation-name: od-flash; }
+
+@keyframes od-right {
+  0% { left: 0; opacity: 0; }
+  4.2%, 22.6% { opacity: 1; }
+  23.53%, 100% { left: 100%; opacity: 0; }
+}
+
+@keyframes od-left {
+  0% { left: 100%; opacity: 0; }
+  4.2%, 22.6% { opacity: 1; }
+  23.53%, 100% { left: 0; opacity: 0; }
+}
+
+@keyframes od-down {
+  0% { top: 0; opacity: 0; }
+  4.2%, 22.6% { opacity: 1; }
+  23.53%, 100% { top: 100%; opacity: 0; }
+}
+
+@keyframes od-up {
+  0% { top: 100%; opacity: 0; }
+  4.2%, 22.6% { opacity: 1; }
+  23.53%, 100% { top: 0; opacity: 0; }
+}
+
+@keyframes od-pop {
+  0% { opacity: 0; transform: translateX(var(--bx, -50%)) scale(0.6); }
+  4.2% { opacity: 1; transform: translateX(var(--bx, -50%)) scale(1.15); }
+  8.5%, 18.4% { opacity: 1; transform: translateX(var(--bx, -50%)) scale(1); }
+  23.53%, 100% { opacity: 0; transform: translateX(var(--bx, -50%)) scale(1); }
+}
+
+@keyframes od-spark {
+  0% { opacity: 0; transform: rotate(var(--a)) translateY(3px) scaleY(0.3); }
+  2.8% { opacity: 1; }
+  15.5%, 100% { opacity: 0; transform: rotate(var(--a)) translateY(22px) scaleY(1); }
+}
+
+@keyframes od-stub {
+  0% { opacity: 0; }
+  2.8% { opacity: 1; }
+  12.7% { opacity: 1; }
+  15.5%, 100% { opacity: 0; }
+}
+
+@keyframes od-hit {
+  0% { box-shadow: 0 0 0 1px var(--color-paper), 0 0 18px 2px rgba(255, 255, 255, 0.45); }
+  14%, 100% { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0), 0 0 18px 2px rgba(255, 255, 255, 0); }
+}
+
+@keyframes od-flash {
+  0% { opacity: 1; }
+  14%, 100% { opacity: 0; }
 }
 
 /* Take the slowed flash time from the diagram (set in SdkFlowOneDb) instead of C's 0.8s. */
 .flow--one-db .flow__node--jev {
   --ping: inherit;
-}
-
-@keyframes node-flash {
-  0% { opacity: 1; }
-  10%, 100% { opacity: 0; }
 }
 
 /* ---- Wrapped (D): the SDK is a layer around your code, inside your app. ---- */
@@ -833,6 +889,59 @@ code,
   transform-origin: 50% 0;
   opacity: 0;
   animation: spark 4.8s ease-out var(--delay, 0s) infinite;
+}
+
+/* Direction stub on the code | sdk seam, shown together with the sparks. --flip turns it:
+   0deg = right (call), 180deg = left (response); narrow screens add 90deg (seam is horizontal). */
+.flow__stub {
+  position: absolute;
+  top: -5px;
+  left: -7px;
+  width: 14px;
+  height: 10px;
+  overflow: visible;
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  animation: stub 4.8s ease-out var(--delay, 0s) infinite;
+}
+
+.flow__stub--left {
+  --flip: 180deg;
+}
+
+/* Fixed direction; the keyframes only fade it in and out (no movement). */
+.flow__stub {
+  transform: rotate(var(--flip, 0deg));
+}
+
+@keyframes stub {
+  0% { opacity: 0; }
+  2% { opacity: 1; }
+  9% { opacity: 1; }
+  11%, 100% { opacity: 0; }
+}
+
+/* Same beat as the sparks on the slower loops: RAG 1 (sparks 0-5.5%) and RAG 2/3 (sparks 0-4.4%). */
+.flow--rag .flow__stub { animation-name: rag-stub; animation-duration: var(--loop); }
+.flow--rag2 .flow__stub { animation-name: r2-stub; animation-duration: var(--loop); }
+.flow--one-db .flow__stub { animation-duration: var(--loop); }
+
+@keyframes rag-stub {
+  0% { opacity: 0; }
+  1% { opacity: 1; }
+  4.5% { opacity: 1; }
+  5.5%, 100% { opacity: 0; }
+}
+
+@keyframes r2-stub {
+  0% { opacity: 0; }
+  0.8% { opacity: 1; }
+  3.6% { opacity: 1; }
+  4.4%, 100% { opacity: 0; }
 }
 
 @keyframes burst-pop {
@@ -1114,16 +1223,10 @@ code,
   min-width: 848px;
 }
 
-/* Filled "your app" panel, like the sketch. */
-.flow--rag2 .flow__frame {
-  background: var(--color-carbon);
-  border-color: var(--color-graphite);
-}
-
 .flow--rag2 .flow__frame--top {
   grid-row: 1 / 3;
   grid-column: 2 / 6;
-  margin: -44px -16px 34px;
+  margin: -36px -16px 34px;
 }
 
 .flow--rag-stack .flow__frame--top {
@@ -1137,24 +1240,21 @@ code,
   margin: -30px -12px -12px;
 }
 
-.flow--rag2 .flow__frame-label {
-  top: var(--space-2);
-  left: var(--space-2);
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-button);
-  background: var(--color-obsidian);
-  color: var(--color-paper);
-  font-family: var(--font-ui);
-  font-size: 12px;
-  font-weight: var(--weight-strong);
-}
-
+/* Same look as the basic diagram: code on the card surface, SDK one step lighter. */
 .flow--rag2 .flow__node--app,
 .flow--rag2 .flow__node--sdk {
-  min-height: 96px;
   align-self: stretch;
   justify-content: center;
+}
+
+.flow--rag2 .flow__node--sdk {
   background: var(--color-obsidian);
+}
+
+/* The side layout needs taller boxes so its lookup arrow can leave under the Jev lines. */
+.flow--rag-side .flow__node--app,
+.flow--rag-side .flow__node--sdk {
+  min-height: 96px;
 }
 
 .flow--rag2 .flow__node--app {
@@ -1167,10 +1267,6 @@ code,
   position: relative;
   border-radius: 0 var(--radius-card) var(--radius-card) 0;
   color: var(--color-paper);
-}
-
-.flow--rag2 .flow__pair > .flow__node {
-  background: var(--color-obsidian);
 }
 
 .flow--rag2 .flow__node--jev {
@@ -1508,9 +1604,53 @@ code,
 /* ---------- Timeline player under the RAG diagrams (LoopPlayer) ---------- */
 /* Card surface, hairline borders, accent only for what's active. Motion instead of glow:
    the playhead pings while playing, ticks light up as they pass, captions slide in. */
+/* "Walkthrough" toggle: the player stays hidden until someone asks for it. */
+.walkthrough {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-5);
+}
+
+.walkthrough__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border);
+  border-radius: var(--radius-button);
+  background: transparent;
+  color: var(--color-mist);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.walkthrough__toggle:hover,
+.walkthrough__toggle:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-paper);
+}
+
+.walkthrough__toggle--open {
+  border-color: var(--color-accent);
+  color: var(--color-paper);
+}
+
+.walkthrough__chevron {
+  transition: transform 200ms ease;
+}
+
+.walkthrough__toggle--open .walkthrough__chevron {
+  transform: rotate(180deg);
+}
+
 .player {
   max-width: 720px;
-  margin: var(--space-6) auto 0;
+  margin: var(--space-3) auto 0;
+  animation: player-open 220ms ease-out;
   padding: var(--space-4) var(--space-5);
   border: var(--border);
   border-radius: var(--radius-card);
@@ -1677,15 +1817,6 @@ code,
   outline-offset: 3px;
 }
 
-.player__clock {
-  flex: none;
-  width: 44px;
-  color: var(--color-fog);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  text-align: right;
-}
-
 .player__reset {
   display: inline-flex;
   flex: none;
@@ -1726,6 +1857,11 @@ code,
   font-size: 12px;
 }
 
+@keyframes player-open {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
 @keyframes player-caption-in {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: none; }
@@ -1740,10 +1876,6 @@ code,
     gap: var(--space-3);
   }
 
-  .player__clock {
-    display: none;
-  }
-
   .player__reset {
     padding: var(--space-2);
     font-size: 0; /* icon only */
@@ -1753,7 +1885,8 @@ code,
 
 @media (prefers-reduced-motion: reduce) {
   .player--playing .player__head::after,
-  .player__caption {
+  .player__caption,
+  .player {
     animation: none;
   }
 }
@@ -2428,6 +2561,273 @@ code,
   }
 
   .flow--one-db .flow__link--db .flow__pulse--copy-out {
-    animation-name: move-right;
+    animation-name: od-right;
   }
+}
+
+/* ---------- JSON → tables (JsonToTable, /diagrams/json-to-table) ---------- */
+/* Card surfaces, hairline borders, mono for data, accent only on what's changing now. */
+.j2t {
+  margin-top: var(--space-8);
+}
+
+.j2t__stage,
+.j2t--flow {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.j2t__label {
+  margin: 0 0 var(--space-2);
+  color: var(--color-ash);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.j2t__json {
+  position: sticky;
+  top: 88px;
+  margin: 0;
+  padding: var(--space-4);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-carbon);
+}
+
+.j2t__json pre {
+  margin: 0;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.j2t__line {
+  display: block;
+  margin: 0 calc(-1 * var(--space-2));
+  padding: 0 var(--space-2);
+  border-left: 2px solid transparent;
+  color: var(--color-ash);
+  transition: color 250ms ease, background-color 250ms ease, border-color 250ms ease;
+}
+
+.j2t__line--on {
+  border-left-color: var(--color-accent);
+  background: var(--color-accent-muted);
+  color: var(--color-paper);
+}
+
+.j2t__tables {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.j2t__table {
+  padding: var(--space-3);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-carbon);
+  transition: border-color 250ms ease;
+}
+
+/* Tables with many columns (e.g. requests with user and group) take the full row. */
+.j2t__table--wide {
+  grid-column: 1 / -1;
+}
+
+.j2t__table--on {
+  border-color: var(--color-accent);
+}
+
+.j2t__table--on .j2t__label {
+  color: var(--color-accent);
+}
+
+.j2t__table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.j2t__table th {
+  padding: 0 var(--space-2) var(--space-1) 0;
+  border-bottom: var(--border);
+  color: var(--color-fog);
+  font-weight: var(--weight-regular);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.j2t__table td {
+  max-width: 140px;
+  overflow: hidden;
+  padding: var(--space-1) var(--space-2) var(--space-1) 0;
+  color: var(--color-mist);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.j2t__row {
+  transition: opacity 250ms ease;
+}
+
+/* Rows not added yet keep their space (so nothing jumps) but stay invisible. */
+.j2t__row--pending {
+  opacity: 0;
+}
+
+.j2t__row--new td {
+  animation: j2t-row-in 700ms ease-out;
+  color: var(--color-paper);
+}
+
+@keyframes j2t-row-in {
+  0% { background: var(--color-accent-muted); transform: translateX(-6px); opacity: 0; }
+  40% { opacity: 1; transform: none; }
+  100% { background: transparent; }
+}
+
+/* B: the flying piece of JSON. */
+.j2t__chip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-badge);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.j2t__controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 720px;
+  margin: var(--space-6) auto 0;
+  padding: var(--space-4) var(--space-5);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-carbon);
+}
+
+.j2t__caption {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-height: 3em;
+  margin: 0;
+  color: var(--color-mist);
+  font-size: 14px;
+  line-height: 1.5;
+  animation: player-caption-in 240ms ease-out;
+}
+
+.j2t__buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.j2t__buttons .player__icon-btn {
+  font-size: 12px;
+}
+
+.j2t__dots {
+  display: flex;
+  gap: 6px;
+  margin-left: var(--space-3);
+}
+
+.j2t__dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 1px solid var(--color-smoke);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+
+.j2t__dot:hover,
+.j2t__dot:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.j2t__dot--done {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}
+
+.j2t__dot--current {
+  border-color: var(--color-accent);
+  transform: scale(1.4);
+}
+
+@media (max-width: 900px) {
+  .j2t__stage,
+  .j2t--flow {
+    grid-template-columns: 1fr;
+  }
+
+  .j2t__json {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .j2t__tables {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .j2t__row--new td,
+  .j2t__caption {
+    animation: none;
+  }
+}
+
+/* Flow version: rows start hidden; the animation fades them in. Table bodies keep row order. */
+.j2t--flow .j2t__row {
+  opacity: 0;
+}
+
+.j2t--flow .j2t__json {
+  position: static;
+}
+
+/* Narrow screens: code sits above the SDK, so the stub points down (call) / up (response). */
+@media (max-width: 900px) {
+  .flow--joined .flow__stub,
+  .flow--rag .flow__stub { --flip: 90deg; }
+  .flow--joined .flow__stub--left,
+  .flow--rag .flow__stub--left { --flip: 270deg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow__stub { display: none; }
+}
+
+/* Review pages (/diagrams…): room below the last diagram so it can scroll to mid-screen. */
+.review-page {
+  padding-bottom: 40vh;
+}
+
+/* The flow version's lines all fit; only the highlight padding pokes out, so no scrollbar. */
+.j2t--flow .j2t__json pre {
+  overflow-x: hidden;
 }
