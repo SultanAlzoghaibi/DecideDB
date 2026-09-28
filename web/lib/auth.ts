@@ -28,6 +28,9 @@ export const auth = betterAuth({
   // UUID ids, same as the rest of the schema. Postgres generates them.
   advanced: { database: { generateId: "uuid" } },
   emailAndPassword: { enabled: true },
+  // A failed Google/GitHub login (cancelled, email already used by a password
+  // account, ...) comes back to /login?error=<code> instead of Better Auth's own page.
+  onAPIError: { errorURL: "/login" },
   socialProviders: { ...(github && { github }), ...(google && { google }) },
   // Lets server actions set the session cookie. Must be the last plugin.
   plugins: [nextCookies()],

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { GitHubIcon, GoogleIcon } from "./ProviderIcons";
@@ -14,11 +14,27 @@ const PROVIDERS: Record<Provider, { label: string; Icon: () => React.ReactElemen
 };
 
 // Email + password form, plus a button per OAuth provider the server has keys for.
-export function LoginForm({ providers }: { providers: Provider[] }) {
+export function LoginForm({
+  providers,
+  initialError,
+}: {
+  providers: Provider[];
+  initialError: string | null;
+}) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("signin");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
   const [pending, setPending] = useState(false);
+
+  // Pressing Back from Google/GitHub can restore this page from the browser's
+  // back-forward cache with the buttons still disabled; re-enable them.
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setPending(false);
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -32,12 +48,13 @@ export function LoginForm({ providers }: { providers: Provider[] }) {
       mode === "signup"
         ? await authClient.signUp.email({ name: String(form.get("name")), email, password })
         : await authClient.signIn.email({ email, password });
-    setPending(false);
 
     if (error) {
+      setPending(false);
       setError(error.message ?? "Something went wrong. Try again.");
       return;
     }
+    // Stay disabled while navigating, so a second click can't submit again.
     // refresh() so server components re-read the new session cookie.
     router.push("/console");
     router.refresh();
