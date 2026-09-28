@@ -1,10 +1,11 @@
 [project]
 name = "jevdb"
-version = "0.1.0"
-description = "Log Jev calls to JevDB in the background"
+version = "0.2.0"
+description = "Call Jev and keep a copy of every decision in JevDB"
 readme = "README.md"
 requires-python = ">=3.9"
-dependencies = []
+# TypeSafe's official SDK: JevDB wraps its clients, so users keep the typed Noul/Choice/Score API.
+dependencies = ["typesafe-sdk>=0.6.0"]
 
 [build-system]
 requires = ["hatchling"]

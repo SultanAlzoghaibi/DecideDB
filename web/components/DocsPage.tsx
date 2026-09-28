@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Nav } from "./Nav";
 import { Footer } from "./Footer";
 import { CodeBlock } from "./CodeBlock";
+import { DocTable, DocsNav, useActiveSection } from "./docsShared";
 
 // Mock docs: they describe JevDB as designed, before the service exists.
 
@@ -18,38 +18,18 @@ const SECTIONS = [
   { id: "configuration", label: "Configuration" },
   { id: "retrieval", label: "Retrieval" },
 ];
-
-// Highlights the sidebar link for whichever section is currently near the top of the screen.
-function useActiveSection() {
-  const [active, setActive] = useState(SECTIONS[0]!.id);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting);
-        if (visible.length > 0) setActive(visible[0]!.target.id);
-      },
-      { rootMargin: "-80px 0px -70% 0px" },
-    );
-    for (const s of SECTIONS) {
-      const el = document.getElementById(s.id);
-      if (el) observer.observe(el);
-    }
-    return () => observer.disconnect();
-  }, []);
-
-  return active;
-}
+const SECTION_IDS = SECTIONS.map((s) => s.id);
 
 export function DocsPage() {
-  const active = useActiveSection();
+  const active = useActiveSection(SECTION_IDS);
 
   return (
     <>
       <Nav active="docs" />
       <div className="container docs">
         <aside className="docs__sidebar">
-          <p className="docs__group">Getting started</p>
+          <DocsNav current="/docs" />
+          <p className="docs__group">On this page</p>
           <nav>
             {SECTIONS.map((s) => (
               <a
@@ -299,32 +279,5 @@ function Retrieval() {
         Interested in testing this? Open an issue with what you tried and what changed.
       </p>
     </section>
-  );
-}
-
-function DocTable({ head, rows }: { head: string[]; rows: string[][] }) {
-  return (
-    <div className="doc__table">
-      <table className="table">
-        <thead>
-          <tr>
-            {head.map((h) => (
-              <th key={h}>{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row[0]}>
-              {row.map((cell, i) => (
-                <td key={i} className={i === 0 ? "mono" : undefined}>
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
   );
 }

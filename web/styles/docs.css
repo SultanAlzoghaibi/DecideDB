@@ -149,3 +149,62 @@
     display: none;
   }
 }
+
+/* ---------- Code tabs (Sync | Async, uv | pip) ---------- */
+.code-tabs {
+  margin: var(--space-4) 0;
+}
+
+.code-tabs .code {
+  margin: 0;
+}
+
+.code-tabs__switch {
+  display: inline-flex;
+  gap: 2px;
+  margin-bottom: var(--space-2);
+  padding: 2px;
+  border: var(--border);
+  border-radius: var(--radius-button);
+  background: var(--color-carbon);
+}
+
+.code-tabs__tab {
+  padding: 4px var(--space-3);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-fog);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease;
+}
+
+.code-tabs__tab:hover,
+.code-tabs__tab:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+  color: var(--color-paper);
+}
+
+.code-tabs__tab--on {
+  background: var(--color-obsidian);
+  color: var(--color-paper);
+  border-bottom-color: var(--color-accent);
+}
+
+/* API reference: parameter name + type line. */
+.doc__sig {
+  margin: var(--space-6) 0 var(--space-2);
+  color: var(--color-paper);
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+
+.doc h3 {
+  margin: var(--space-8) 0 var(--space-2);
+  color: var(--color-paper);
+  font-size: 16px;
+  font-weight: var(--weight-medium);
+}
