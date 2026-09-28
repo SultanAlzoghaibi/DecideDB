@@ -18,7 +18,7 @@ Bring the best-graded past examples into new requests.
 - Evidence so far: TypeSafe's docs show examples that *match real inputs* can raise confidence sharply, and unrelated ones do nothing (see retrieval.md).
 
 ### 2b. A/B testing
-Prove what actually helps instead of guessing.
+Prove what actually helps instead of guessing. Far-vision notes (Langfuse comparison, bandits, pitfalls): `notes/ab-testing.md`.
 - **Retrieval on vs off:** split traffic, compare grades between the two groups. This is how we find out if 2a works at all.
 - **Question versions:** run two wordings/criteria of the same question side by side and compare their grades. The schema already versions questions (`question_versions` in db-schema.md), so each answer knows which version produced it.
 - Needs: a way to assign each call to a variant (in the SDK), and a dashboard view comparing grade rates + confidence per variant.

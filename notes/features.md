@@ -6,7 +6,7 @@
 - [ ] `/ingest/response` writes request/response to Postgres (state, questions, answers, confidence, latency)
 - [ ] Hosted JevDB URL (SDK default is localhost for now)
 - [ ] Single hardcoded API key
-- [ ] Docker Compose (web + postgres)
+- [ ] Docker Compose (web + postgres) — postgres done (`docker-compose.yml`), web container TODO
 
 ## Web UI
 - [ ] Decisions table (newest first, paginated)
@@ -22,7 +22,7 @@
 - [ ] Projects + `project_id` on all tables
 - [ ] Hashed, rotatable API keys
 - [ ] Postgres RLS (per-transaction context)
-- [ ] Web UI login
+- [x] Web UI login (Better Auth: email + password, optional GitHub/Google) → `/console` stub
 
 ## Scale / Ops
 - [ ] PgBouncer pooling

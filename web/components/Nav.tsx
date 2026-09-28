@@ -1,7 +1,7 @@
 import { GITHUB_URL } from "@/lib/links";
 import { Logo } from "./Logo";
 
-export function Nav({ active }: { active?: "docs" }) {
+export function Nav({ active }: { active?: "docs" | "console" }) {
   return (
     <header className="nav">
       <div className="container nav__inner">
@@ -12,6 +12,10 @@ export function Nav({ active }: { active?: "docs" }) {
         <nav className="nav__links">
           <a href="/docs" className={`nav__link${active === "docs" ? " nav__link--active" : ""}`}>
             Docs
+          </a>
+          {/* Logged-out visitors get sent to /login from here. */}
+          <a href="/console" className={`nav__link${active === "console" ? " nav__link--active" : ""}`}>
+            Console
           </a>
           <a href={GITHUB_URL} className="btn btn--ghost">
             GitHub

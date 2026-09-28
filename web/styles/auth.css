@@ -1,0 +1,193 @@
+/* ---------- Login ---------- */
+.auth {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-24) var(--space-4);
+}
+
+.auth__card {
+  width: 100%;
+  max-width: 380px;
+  padding: var(--space-6);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-carbon);
+}
+
+.auth__title {
+  margin: 0 0 var(--space-1);
+  color: var(--color-paper);
+  font-size: 24px;
+  font-weight: var(--weight-regular);
+  line-height: 1.33;
+}
+
+.auth__sub {
+  margin: 0 0 var(--space-6);
+  color: var(--color-fog);
+  font-size: 14px;
+}
+
+.auth__form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.auth__form .btn,
+.auth__oauth .btn {
+  justify-content: center;
+  width: 100%;
+}
+
+.auth__oauth {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* OAuth buttons: full-size like the primary button so they're easy to hit. */
+.auth__provider {
+  padding: 10px var(--space-4);
+  font-size: 14px;
+}
+
+.auth__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+  color: var(--color-fog);
+  font-size: 12px;
+}
+
+.auth__divider::before,
+.auth__divider::after {
+  content: "";
+  flex: 1;
+  border-top: var(--border);
+}
+
+.auth__switch {
+  margin: var(--space-4) 0 0;
+  color: var(--color-fog);
+  font-size: 13px;
+  text-align: center;
+}
+
+.auth__switch button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.auth__error {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-badge);
+  background: rgba(240, 101, 58, 0.12);
+  color: var(--color-bad);
+  font-size: 13px;
+}
+
+/* ---------- Form fields ---------- */
+.field {
+  display: grid;
+  gap: var(--space-1);
+  font-size: 13px;
+}
+
+.field__label {
+  color: var(--color-mist);
+}
+
+.input {
+  padding: 10px var(--space-3);
+  border: 1px solid var(--color-smoke);
+  border-radius: var(--radius-input);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-mist);
+  font: inherit;
+  font-size: 14px;
+  transition: border-color 120ms ease;
+}
+
+.input::placeholder {
+  color: var(--color-fog);
+}
+
+.input:hover {
+  border-color: rgba(212, 91, 182, 0.5);
+}
+
+.input:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ---------- Console ---------- */
+.console {
+  display: grid;
+  gap: var(--space-6);
+  padding-top: var(--space-12);
+}
+
+.console__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.console__title {
+  margin: 0;
+  color: var(--color-paper);
+  font-size: 32px;
+  font-weight: var(--weight-regular);
+  line-height: 1.13;
+}
+
+.console__card {
+  padding: var(--space-6);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-carbon);
+}
+
+.console__card h2 {
+  margin: 0 0 var(--space-4);
+  color: var(--color-paper);
+  font-size: 16px;
+  font-weight: var(--weight-medium);
+}
+
+.console__meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-2) var(--space-6);
+  margin: 0;
+  font-size: 14px;
+}
+
+.console__meta dt {
+  color: var(--color-fog);
+}
+
+.console__meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.console__empty {
+  margin: 0;
+  padding: var(--space-8) 0;
+  color: var(--color-fog);
+  font-size: 14px;
+  text-align: center;
+}

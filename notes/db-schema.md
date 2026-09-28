@@ -40,7 +40,14 @@ states ──< requests ──< answers >── question_versions >── instru
 - Free-form content: `text` if string, `body` JSONB if structured (Jev allows both)
 - `blob_req` / `blob_response` (keyed by `req_id`) — blob backup tables, top of each file, droppable
 
+## Auth (`db/migrations/0003_auth.sql`)
+Owned by Better Auth (`web/lib/auth.ts`); regenerate with its CLI, don't hand-edit.
+- `profile` — one row per person who can log in. **Naming rule:** Better Auth calls it `user`; JevDB calls it a profile: table `profile`, FK column `profile_id`, `profileId` in code (`web/lib/session.ts`).
+- `session` (logged-in browsers), `account` (login methods; `password` is a hash), `verification` (short-lived codes).
+- Better Auth's own columns are camelCase (`"emailVerified"`), so quote them in SQL.
+
 ## Later
+- `projects.profile_id` (owner) -> projects own requests, API keys, etc.
 - `project_id` on all tables + RLS
 - Partition `requests` by month
 - Never store the `Authorization` header
