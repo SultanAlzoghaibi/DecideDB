@@ -13,6 +13,8 @@ const PROVIDERS: Record<Provider, { label: string; Icon: () => React.ReactElemen
   github: { label: "Continue with GitHub", Icon: GitHubIcon },
 };
 
+const NETWORK_ERROR = "Couldn't reach JevDB. Check your connection and try again.";
+
 // Email + password form, plus a button per OAuth provider the server has keys for.
 export function LoginForm({
   providers,
@@ -44,10 +46,16 @@ export function LoginForm({
 
     setPending(true);
     setError(null);
-    const { error } =
-      mode === "signup"
-        ? await authClient.signUp.email({ name: String(form.get("name")), email, password })
-        : await authClient.signIn.email({ email, password });
+    let error: { message?: string } | null;
+    try {
+      ({ error } =
+        mode === "signup"
+          ? await authClient.signUp.email({ name: String(form.get("name")), email, password })
+          : await authClient.signIn.email({ email, password }));
+    } catch {
+      // Network failure (server down, offline): the client throws instead of returning an error.
+      error = { message: NETWORK_ERROR };
+    }
 
     if (error) {
       setPending(false);
@@ -64,10 +72,15 @@ export function LoginForm({
     setPending(true);
     setError(null);
     // Leaves the site for GitHub/Google, then comes back to callbackURL.
-    const { error } = await authClient.signIn.social({ provider, callbackURL: "/console" });
-    if (error) {
+    try {
+      const { error } = await authClient.signIn.social({ provider, callbackURL: "/console" });
+      if (error) {
+        setPending(false);
+        setError(error.message ?? "Could not start login. Try again.");
+      }
+    } catch {
       setPending(false);
-      setError(error.message ?? "Could not start login. Try again.");
+      setError(NETWORK_ERROR);
     }
   }
 
@@ -103,7 +116,9 @@ export function LoginForm({
         </>
       )}
 
-      <form className="auth__form" onSubmit={onSubmit}>
+      {/* method="post": if JS hasn't loaded, the browser's fallback submit must never
+          put the password in the URL (a GET would, and URLs end up in history and logs). */}
+      <form className="auth__form" method="post" onSubmit={onSubmit}>
         {isSignup && (
           <label className="field">
             <span className="field__label">Name</span>

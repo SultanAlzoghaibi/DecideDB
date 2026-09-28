@@ -12,8 +12,12 @@ export function SignOutButton() {
   async function onClick() {
     setPending(true);
     setFailed(false);
-    const { error } = await authClient.signOut();
-    if (error) {
+    // The client throws on network failure (instead of returning an error), so treat both the same.
+    const didFail = await authClient.signOut().then(
+      ({ error }) => !!error,
+      () => true,
+    );
+    if (didFail) {
       // Still logged in: don't pretend otherwise, let them retry.
       setPending(false);
       setFailed(true);
