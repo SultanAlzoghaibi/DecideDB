@@ -14,8 +14,9 @@ export function Nav({ active }: { active?: "docs" | "console" }) {
             Docs
           </a>
           {/* Logged-out visitors get sent to /login from here. */}
-          <a href="/console" className={`nav__link${active === "console" ? " nav__link--active" : ""}`}>
+          <a href="/console" className={`nav__cta${active === "console" ? " nav__cta--active" : ""}`}>
             Console
+            <span aria-hidden="true">→</span>
           </a>
           <a href={GITHUB_URL} className="btn btn--ghost">
             GitHub

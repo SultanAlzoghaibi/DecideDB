@@ -9,10 +9,14 @@ services:
       POSTGRES_PASSWORD: jevdb # dev only, never use in production
       POSTGRES_DB: jevdb
     ports:
-      - "5433:5432" # host 5433 so it never clashes with a local Postgres on 5432
+      # Host port 5433 by default so it never clashes with a local Postgres on 5432.
+      # Running two checkouts at once? Set JEVDB_PG_PORT (and the port in DATABASE_URL).
+      - "${JEVDB_PG_PORT:-5433}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/migrations:/docker-entrypoint-initdb.d:ro
 
+# Named volume: data survives `docker compose down` and restarts.
+# Only `docker compose down -v` (or `bun run db:reset` in web/) deletes it.
 volumes:
   pgdata:

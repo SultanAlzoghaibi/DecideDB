@@ -1,7 +1,7 @@
 {
   "name": "@jevdb/sdk",
-  "version": "0.1.0",
-  "description": "Log Jev calls to JevDB in the background",
+  "version": "0.2.0",
+  "description": "Call Jev and keep a copy of every decision in JevDB",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -11,13 +11,18 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "bun build ./src/index.ts --outdir=dist --target=node && tsc --emitDeclarationOnly",
+    "build": "bun build ./src/index.ts --outdir=dist --target=node --external @typesafe-ai/sdk && tsc --emitDeclarationOnly",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/bun": "^1.4.2",
     "typescript": "^5.5.3"
+  },
+  "dependencies": {
+    "@typesafe-ai/sdk": "^0.6.0"
   }
 }

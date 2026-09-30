@@ -19,7 +19,7 @@
 - [ ] Show grades in table
 
 ## Multi-tenancy
-- [x] `profile_id` on every data table (`0004_profile_ownership.sql`) + `withProfile()` query helper
+- [x] `profile_id` on every data table (`0004_profiles_context.sql`) + `withProfile()` query helper
 - [ ] Projects (a profile owns several) — optional, later
 - [ ] Hashed, rotatable API keys
 - [ ] Postgres RLS (per-transaction context) — **before the hosted launch**. Needs: restricted `jevdb_app` DB role, `ENABLE ROW LEVEL SECURITY` + policy `profile_id = current_setting('app.current_profile_id')::uuid` on data tables (not on Better Auth tables)

@@ -1,0 +1,709 @@
+/* Decisions dashboard (/console/decisions and its detail page).
+   Follows web/DESIGN.md: card surfaces, hairline borders, mono for machine data,
+   pink only for what's active (focus, hover, selected), no shadows or gradients. */
+
+.dx {
+  padding-bottom: var(--space-16);
+}
+
+/* ---------- Console tabs ---------- */
+.console-tabs {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: calc(-1 * var(--space-2));
+  border-bottom: var(--border);
+}
+
+.console-tabs__tab {
+  padding: var(--space-2) 0;
+  border-bottom: 2px solid transparent;
+  color: var(--color-fog);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.console-tabs__tab:hover,
+.console-tabs__tab:focus-visible {
+  outline: none;
+  color: var(--color-paper);
+}
+
+.console-tabs__tab--on {
+  border-bottom-color: var(--color-accent);
+  color: var(--color-paper);
+}
+
+/* ---------- Table ---------- */
+.dx-tablewrap {
+  overflow-x: auto;
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-carbon);
+}
+
+.dx-table td {
+  padding: 0;
+}
+
+/* Each cell is a link filling the whole cell, so the entire row is clickable. */
+.dx-cell {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 var(--space-4);
+  color: inherit;
+  text-decoration: none;
+}
+
+.dx-cell:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: -1px;
+}
+
+.dx-q {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.dx-q__text {
+  max-width: 340px;
+  overflow: hidden;
+  color: var(--color-fog);
+  font-size: 12px;
+  text-overflow: ellipsis;
+}
+
+.dx-qcell .dx-cell {
+  height: 52px;
+}
+
+.dx-ctxcell .dx-cell {
+  justify-content: center;
+  padding: 0 var(--space-3);
+}
+
+.dx-answer {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  color: var(--color-paper);
+}
+
+.dx-yes {
+  color: var(--color-good);
+  font-weight: var(--weight-medium);
+}
+
+.dx-no {
+  color: var(--color-mist);
+  font-weight: var(--weight-medium);
+}
+
+/* Type badges: one quiet tint each, so types are easy to scan. */
+.dx-type--choice {
+  color: var(--color-mist);
+}
+
+.dx-type--score {
+  color: var(--color-warn);
+}
+
+.dx-type--error {
+  background: rgba(240, 101, 58, 0.12);
+  color: var(--color-bad);
+}
+
+/* The sun: "context was added". */
+.dx-sun circle {
+  fill: var(--color-accent);
+}
+
+.dx-sun__rays {
+  stroke: var(--color-accent);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+
+.dx-nomatch {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-12) var(--space-4);
+  color: var(--color-fog);
+  font-size: 14px;
+}
+
+.dx-nomatch p {
+  margin: 0;
+}
+
+.dx-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.dx-pager__links {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* ---------- Empty state ---------- */
+.dx-empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+}
+
+.dx-empty p {
+  margin: 0;
+  color: var(--color-fog);
+  font-size: 14px;
+}
+
+.dx-cmd {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border);
+  border-radius: var(--radius-input);
+  background: var(--color-void);
+  color: var(--color-mist);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+/* ---------- Detail page ---------- */
+.dx-back {
+  color: var(--color-fog);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.dx-back:hover {
+  color: var(--color-paper);
+}
+
+.dx-title .mono {
+  font-size: 16px;
+}
+
+.dx-ctxpill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 2px var(--space-3);
+  border: 1px solid rgba(212, 91, 182, 0.4);
+  border-radius: var(--radius-pill);
+  color: var(--color-paper);
+  font-size: 12px;
+}
+
+.dx-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-6);
+  margin: 0;
+}
+
+.dx-facts--small {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: var(--space-4);
+}
+
+.dx-facts dt {
+  margin-bottom: var(--space-1);
+  color: var(--color-fog);
+  font-size: 12px;
+}
+
+.dx-facts dd {
+  margin: 0;
+  color: var(--color-mist);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.dx-tag + .dx-tag {
+  margin-left: var(--space-1);
+}
+
+.dx-error {
+  margin: var(--space-4) 0 0;
+  color: var(--color-bad);
+  font-size: 13px;
+}
+
+.dx-help {
+  margin: calc(-1 * var(--space-3)) 0 var(--space-4);
+  color: var(--color-fog);
+  font-size: 13px;
+}
+
+.dx-state {
+  margin: 0;
+  padding: var(--space-4);
+  border: var(--border);
+  border-radius: var(--radius-input);
+  background: var(--color-void);
+  color: var(--color-paper);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.dx-ctxcard {
+  border-color: rgba(212, 91, 182, 0.4);
+}
+
+.dx-ctxcard h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.dx-sectiontitle {
+  margin: var(--space-4) 0 calc(-1 * var(--space-2));
+  color: var(--color-paper);
+  font-size: 16px;
+  font-weight: var(--weight-medium);
+}
+
+.dx-qcard {
+  scroll-margin-top: 96px;
+}
+
+/* Arriving from a row link: briefly mark the question that row was about. */
+.dx-qcard:target {
+  border-color: var(--color-accent);
+}
+
+.dx-qcard__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.dx-qcard__key {
+  color: var(--color-paper);
+  font-size: 15px;
+}
+
+.dx-qcard__text {
+  margin: var(--space-2) 0 var(--space-4);
+  color: var(--color-mist);
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+
+.dx-qcard__answer {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.dx-big {
+  color: var(--color-paper);
+  font-size: 20px;
+}
+
+.dx-conf {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 13px;
+}
+
+.dx-probs {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 520px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dx-probs__row {
+  display: grid;
+  grid-template-columns: 110px 1fr 44px;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-fog);
+  font-size: 13px;
+}
+
+.dx-probs__track {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-smoke);
+  overflow: hidden;
+}
+
+.dx-probs__fill {
+  display: block;
+  height: 100%;
+  background: var(--color-ash);
+}
+
+.dx-probs__row--on {
+  color: var(--color-paper);
+}
+
+.dx-probs__row--on .dx-probs__fill {
+  background: var(--color-accent);
+}
+
+.dx-probs__val {
+  text-align: right;
+}
+
+.dx-details {
+  margin-top: var(--space-4);
+}
+
+.dx-details summary {
+  color: var(--color-fog);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.dx-details summary:hover {
+  color: var(--color-paper);
+}
+
+.dx-details[open] summary {
+  margin-bottom: var(--space-3);
+}
+
+.dx-criteria {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: var(--space-4);
+  font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .dx-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dx-facts--small {
+    grid-template-columns: 1fr;
+  }
+
+  .dx-probs__row {
+    grid-template-columns: 90px 1fr 40px;
+  }
+}
+
+/* Keep the big answer big even when it's a mono option name. */
+.dx-big .mono {
+  font-size: inherit;
+}
+
+/* ---------- Explorer (Datadog-style) ---------- */
+.dx-live {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-fog);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+/* A small pulsing dot, like a live log view. */
+.dx-live i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-good);
+  animation: dx-pulse 2s ease-in-out infinite;
+}
+
+@keyframes dx-pulse {
+  50% { opacity: 0.35; }
+}
+
+.dx-querybar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+  border: 1px solid var(--color-smoke);
+  border-radius: var(--radius-input);
+  background: var(--color-void);
+  transition: border-color 120ms ease;
+}
+
+.dx-querybar:hover {
+  border-color: rgba(212, 91, 182, 0.5);
+}
+
+.dx-querybar:focus-within {
+  border-color: var(--color-accent);
+}
+
+.dx-prompt {
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 16px;
+}
+
+.dx-query {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--color-paper);
+  font-size: 13px;
+}
+
+.dx-query:focus {
+  outline: none;
+}
+
+.dx-query::placeholder {
+  color: var(--color-ash);
+}
+
+.dx-ranges {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+  padding: 2px;
+  border: var(--border);
+  border-radius: var(--radius-button);
+  background: var(--color-carbon);
+}
+
+.dx-range {
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--color-fog);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.dx-range:hover,
+.dx-range:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+  color: var(--color-paper);
+}
+
+.dx-range--on {
+  border-bottom-color: var(--color-accent);
+  background: var(--color-obsidian);
+  color: var(--color-paper);
+}
+
+.dx-chiprow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: calc(-1 * var(--space-3));
+  font-size: 12px;
+}
+
+.dx-token {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px var(--space-2);
+  border: 1px solid rgba(212, 91, 182, 0.4);
+  border-radius: var(--radius-badge);
+  background: var(--color-accent-muted);
+  color: var(--color-paper);
+  font-family: var(--font-mono);
+  text-decoration: none;
+}
+
+.dx-token:hover {
+  border-color: var(--color-accent);
+}
+
+.dx-token--text {
+  border-color: var(--color-smoke);
+  background: transparent;
+}
+
+.dx-example {
+  padding: 2px var(--space-2);
+  border: var(--border);
+  border-radius: var(--radius-badge);
+  color: var(--color-fog);
+  text-decoration: none;
+}
+
+.dx-example:hover {
+  border-color: var(--color-accent);
+  color: var(--color-paper);
+}
+
+/* Volume histogram */
+.dx-histo {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 64px;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-carbon);
+}
+
+.dx-histo__bar {
+  display: flex;
+  flex: 1;
+  flex-direction: column-reverse;
+  height: 100%;
+  border-radius: 1px;
+}
+
+.dx-histo__bar:hover .dx-histo__ok {
+  background: var(--color-accent);
+}
+
+.dx-histo__ok {
+  background: var(--color-ash);
+  border-radius: 1px 1px 0 0;
+}
+
+.dx-histo__err {
+  background: var(--color-bad);
+}
+
+/* Facets + results */
+.dx-explorer {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.dx-results {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.dx-facets {
+  display: grid;
+  gap: var(--space-4);
+  position: sticky;
+  top: 80px;
+}
+
+.dx-facet h3 {
+  margin: 0 0 var(--space-1);
+  color: var(--color-fog);
+  font-size: 11px;
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.dx-facet ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dx-facet__item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 3px var(--space-2);
+  border-left: 2px solid transparent;
+  border-radius: 0 4px 4px 0;
+  color: var(--color-mist);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.dx-facet__item:hover {
+  background: var(--color-obsidian);
+  color: var(--color-paper);
+}
+
+.dx-facet__item--on {
+  border-left-color: var(--color-accent);
+  background: var(--color-obsidian);
+  color: var(--color-paper);
+}
+
+.dx-facet__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dx-facet__count {
+  color: var(--color-ash);
+  font-size: 12px;
+}
+
+.dx-dot::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.dx-dot--ok::before {
+  background: var(--color-good);
+}
+
+.dx-dot--error::before {
+  background: var(--color-bad);
+}
+
+/* Log-stream rows: a thin status stripe on the left, mono date. */
+.dx-stream .dx-stripe {
+  width: 3px;
+  min-width: 3px;
+  max-width: 3px;
+  padding: 0;
+}
+
+.dx-stream td.dx-stripe {
+  background: rgba(39, 166, 68, 0.45);
+}
+
+.dx-stream .dx-row--error .dx-stripe {
+  background: var(--color-bad);
+}
+
+.dx-stream .dx-row--error {
+  background: rgba(240, 101, 58, 0.04);
+}
+
+@media (max-width: 900px) {
+  .dx-explorer {
+    grid-template-columns: 1fr;
+  }
+
+  .dx-facets {
+    position: static;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .dx-querybar {
+    flex-wrap: wrap;
+  }
+
+  .dx-ranges {
+    order: 3;
+  }
+}

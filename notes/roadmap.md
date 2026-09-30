@@ -23,3 +23,7 @@ Prove what actually helps instead of guessing. Far-vision notes (Langfuse compar
 - **Question versions:** run two wordings/criteria of the same question side by side and compare their grades. The schema already versions questions (`question_versions` in db-schema.md), so each answer knows which version produced it.
 - Needs: a way to assign each call to a variant (in the SDK), and a dashboard view comparing grade rates + confidence per variant.
 - Open: how many graded calls are needed before a difference is real (sample size / significance).
+
+## Version 3: beyond Jev, beyond text
+- **Other AI models:** support more decision models than Jev (e.g. future System One-style models from other labs), with the same log → grade → improve loop. The SDK and schema already store the model per call.
+- **Images:** accept image state once Jev (or another model) supports it. Jev is text-only today (see TypeSafe's State docs). Needs image storage, image previews in the dashboard, and images in retrieval examples.

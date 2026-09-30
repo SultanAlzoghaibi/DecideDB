@@ -1,55 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Nav } from "./Nav";
 import { Footer } from "./Footer";
 import { CodeBlock } from "./CodeBlock";
+import { CodeTabs } from "./CodeTabs";
+import { DocTable, DocsNav, useActiveSection } from "./docsShared";
 
 // Mock docs: they describe JevDB as designed, before the service exists.
+// Cloud first; self-hosting is the alternative.
+
+// Hosted URL isn't decided yet; change it here once it is.
+const CLOUD_URL = "https://<jevdb-cloud-url>";
+const GIT_PY = "jevdb @ git+https://github.com/SultanAlzoghaibi/JevDB#subdirectory=sdk/python";
 
 const SECTIONS = [
   { id: "introduction", label: "Introduction" },
-  { id: "quickstart", label: "Quickstart" },
-  { id: "connect", label: "Connect your app" },
+  { id: "quickstart", label: "Quickstart (Cloud)" },
+  { id: "project-layout", label: "Where it goes in your project" },
   { id: "logging", label: "What gets logged" },
   { id: "question-types", label: "Question types" },
   { id: "grading", label: "Grading" },
   { id: "dashboard", label: "Dashboard" },
+  { id: "self-host", label: "Self-host (alternative)" },
   { id: "configuration", label: "Configuration" },
   { id: "retrieval", label: "Retrieval" },
 ];
-
-// Highlights the sidebar link for whichever section is currently near the top of the screen.
-function useActiveSection() {
-  const [active, setActive] = useState(SECTIONS[0]!.id);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting);
-        if (visible.length > 0) setActive(visible[0]!.target.id);
-      },
-      { rootMargin: "-80px 0px -70% 0px" },
-    );
-    for (const s of SECTIONS) {
-      const el = document.getElementById(s.id);
-      if (el) observer.observe(el);
-    }
-    return () => observer.disconnect();
-  }, []);
-
-  return active;
-}
+const SECTION_IDS = SECTIONS.map((s) => s.id);
 
 export function DocsPage() {
-  const active = useActiveSection();
+  const active = useActiveSection(SECTION_IDS);
 
   return (
     <>
       <Nav active="docs" />
       <div className="container docs">
         <aside className="docs__sidebar">
-          <p className="docs__group">Getting started</p>
+          <DocsNav current="/docs" />
+          <p className="docs__group">On this page</p>
           <nav>
             {SECTIONS.map((s) => (
               <a
@@ -67,18 +54,19 @@ export function DocsPage() {
           <div className="notice">
             <span className="tag tag--warn">Draft</span>
             <p>
-              These docs describe JevDB as designed. It isn't released yet, so names, ports and
+              These docs describe JevDB as designed. It isn&apos;t released yet, so names, URLs and
               endpoints may change.
             </p>
           </div>
 
           <Introduction />
           <Quickstart />
-          <Connect />
+          <ProjectLayout />
           <Logging />
           <QuestionTypes />
           <Grading />
           <Dashboard />
+          <SelfHost />
           <Configuration />
           <Retrieval />
         </article>
@@ -93,14 +81,19 @@ function Introduction() {
     <section id="introduction" className="doc">
       <h1>Introduction</h1>
       <p>
-        The Jev API is stateless: every call returns an answer and then it's gone. JevDB is a small
-        self-hosted proxy that sits between your app and Jev and keeps a record of everything.
+        The Jev API is stateless: every call returns an answer and then it&apos;s gone. JevDB keeps a
+        record of everything. Your app still calls Jev itself; the JevDB SDK copies each request and
+        response to JevDB in the background, so it never slows your app down.
       </p>
       <ul>
-        <li><strong>Log</strong>: every request and response is saved to Postgres automatically.</li>
+        <li><strong>Log</strong>: every request and response is saved automatically.</li>
         <li><strong>Browse</strong>: a web dashboard lets you search past decisions without SQL.</li>
         <li><strong>Grade</strong>: tag a past decision good or bad once you know the real outcome.</li>
       </ul>
+      <p>
+        The fastest way to start is <strong>JevDB Cloud</strong>: nothing to run. Prefer to keep
+        everything on your own servers? See <a href="#self-host">Self-host</a>.
+      </p>
     </section>
   );
 }
@@ -108,62 +101,99 @@ function Introduction() {
 function Quickstart() {
   return (
     <section id="quickstart" className="doc">
-      <h2>Quickstart</h2>
-      <p>You need Docker. That's it: Postgres, the proxy and the dashboard all run in containers.</p>
+      <h2>Quickstart (Cloud)</h2>
+      <p>
+        1. <a href="/login">Sign up</a> and create an API key in the console. It starts with{" "}
+        <code>jdb_live_</code>.
+      </p>
+      <p>2. Install the SDK:</p>
+      <CodeTabs
+        tabs={[
+          { id: "uv", label: "Python (uv)", file: "terminal", code: "uv add jevdb" },
+          { id: "pip", label: "Python (pip)", file: "terminal", code: "pip install jevdb" },
+          { id: "bun", label: "JS (bun)", file: "terminal", code: "bun add @jevdb/sdk" },
+          { id: "npm", label: "JS (npm)", file: "terminal", code: "npm install @jevdb/sdk" },
+        ]}
+      />
+      <p className="doc__note">
+        Not on PyPI / npm yet. Until then, install straight from GitHub:{" "}
+        <code>uv add &quot;{GIT_PY}&quot;</code>
+      </p>
+      <p>3. Set your keys and point the SDK at JevDB Cloud:</p>
       <CodeBlock
-        label="terminal"
+        label=".env"
         code={`
-git clone <jevdb-repo-url> jevdb
-cd jevdb
-docker compose up
+TYPESAFE_API_KEY=sk-…          # Jev, from console.typesafe.ai
+JEVDB_API_KEY=jdb_live_…       # JevDB, from your JevDB console
+JEVDB_URL=${CLOUD_URL}
 `}
       />
-      <p>Once it's running:</p>
-      <ul>
-        <li>Proxy: <code>http://localhost:8080</code> (point your app here)</li>
-        <li>Dashboard: <code>http://localhost:3000</code></li>
-      </ul>
+      <p>
+        4. Call Jev through the JevDB client, then open the <a href="/console">console</a> to see
+        the decision. Full examples: <a href="/docs/sdk">Client SDK</a>.
+      </p>
     </section>
   );
 }
 
-function Connect() {
-  return (
-    <section id="connect" className="doc">
-      <h2>Connect your app</h2>
-      <p>
-        Change the base URL your app uses for Jev to the proxy. Keep sending your Jev API key as
-        usual: JevDB forwards the request unchanged, whatever path you call, and returns Jev's
-        response unchanged.
-      </p>
-      <CodeBlock
-        label="app.ts"
-        code={`
-// Before: https://<jev-api-host>/...
-// After:  http://localhost:8080/...
-const res = await fetch("http://localhost:8080/v1/evaluate", {
-  method: "POST",
-  headers: {
-    Authorization: \`Bearer \${process.env.JEV_API_KEY}\`,
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    state: "Customer says the order arrived damaged and wants their money back.",
-    questions: [
-      { type: "choice", text: "What is the intent?", options: ["refund_request", "billing", "other"] },
-      { type: "noul", text: "Is the customer angry?" },
-    ],
-  }),
-});
+// One small module creates the client; the rest of the app imports it.
+const TREE_PY = `
+my-app/
+├── .env                  # TYPESAFE_API_KEY, JEVDB_API_KEY, JEVDB_URL
+├── pyproject.toml        # dependency: jevdb
+└── app/
+    ├── main.py           # your server / entry point
+    ├── jevdb_client.py   # ← create JevDB(...) once here
+    └── tickets.py        # from app.jevdb_client import jevdb
+                          #   jevdb.system_one(state=…, questions=…)
+`;
 
-// JevDB adds one header so you can grade this decision later.
-const requestId = res.headers.get("x-jevdb-request-id");
-`}
-      />
-      <p className="doc__note">
-        The Jev endpoint path and payload above are illustrative. JevDB doesn't depend on them; it
-        forwards whatever you send.
+const TREE_JS = `
+my-app/
+├── .env                  # TYPESAFE_API_KEY, JEVDB_API_KEY, JEVDB_URL
+├── package.json          # dependency: @jevdb/sdk
+└── src/
+    ├── index.ts          # your server / entry point
+    ├── lib/
+    │   └── jevdb.ts      # ← export const jevdb = new JevDB({...})
+    └── tickets.ts        # import { jevdb } from "./lib/jevdb"
+                          #   await jevdb.systemOne({ state, questions })
+`;
+
+const CLIENT_PY = `
+from jevdb import JevDB
+
+# Keys and URL come from .env. One client for the whole app.
+jevdb = JevDB(group_id="support-bot", tags=["prod"])
+`;
+
+const CLIENT_JS = `
+import { JevDB } from "@jevdb/sdk";
+
+// Keys and URL come from .env. One client for the whole app.
+export const jevdb = new JevDB({ groupId: "support-bot", tags: ["prod"] });
+`;
+
+function ProjectLayout() {
+  return (
+    <section id="project-layout" className="doc">
+      <h2>Where it goes in your project</h2>
+      <p>
+        Create the client once in its own small file and import it wherever you call Jev. That way
+        keys, <code>group_id</code> and tags live in one place.
       </p>
+      <CodeTabs
+        tabs={[
+          { id: "py", label: "Python", file: "project tree", code: TREE_PY },
+          { id: "js", label: "JavaScript", file: "project tree", code: TREE_JS },
+        ]}
+      />
+      <CodeTabs
+        tabs={[
+          { id: "py", label: "Python", file: "app/jevdb_client.py", code: CLIENT_PY },
+          { id: "js", label: "JavaScript", file: "src/lib/jevdb.ts", code: CLIENT_JS },
+        ]}
+      />
     </section>
   );
 }
@@ -179,8 +209,8 @@ function Logging() {
       <DocTable
         head={["Column", "Type", "Notes"]}
         rows={[
-          ["id", "text", "Same value as the x-jevdb-request-id header"],
-          ["created_at", "timestamptz", "When the proxy received the call"],
+          ["id", "text", "Decision id: jevdb.id_of(response)"],
+          ["created_at", "timestamptz", "When the call started"],
           ["question_type", "text", "noul, choice or score"],
           ["answer", "text", "The typed answer, as text"],
           ["confidence", "real", "0 to 1"],
@@ -191,7 +221,8 @@ function Logging() {
       />
       <p>
         Writes happen in the background after the response is sent, so logging never slows your
-        app down. The trade-off: if the proxy crashes, the last few queued logs can be lost.
+        app down. The trade-off: if your process is killed before <code>flush()</code>, the last
+        few queued logs can be lost.
       </p>
     </section>
   );
@@ -225,7 +256,8 @@ function Grading() {
       <CodeBlock
         label="terminal"
         code={`
-curl -X POST http://localhost:8080/v1/requests/req_8f2a1c/grade \\
+curl -X POST ${CLOUD_URL}/api/decisions/<decision-id>/grade \\
+  -H "Authorization: Bearer $JEVDB_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{ "grade": "good", "note": "customer accepted the refund" }'
 `}
@@ -246,7 +278,8 @@ function Dashboard() {
     <section id="dashboard" className="doc">
       <h2>Dashboard</h2>
       <p>
-        Open <code>http://localhost:3000</code> to see every request in a table, newest first.
+        Open the <a href="/console">console</a> (or <code>http://localhost:3000/console</code> when
+        self-hosting) to see every decision in a table, newest first.
       </p>
       <ul>
         <li>Search by text in the state or answer</li>
@@ -258,20 +291,44 @@ function Dashboard() {
   );
 }
 
+function SelfHost() {
+  return (
+    <section id="self-host" className="doc">
+      <h2>Self-host (alternative)</h2>
+      <p>
+        Want your data on your own machines? Run JevDB yourself. You need Docker; Postgres runs in
+        a container.
+      </p>
+      <CodeBlock
+        label="terminal"
+        code={`
+git clone https://github.com/SultanAlzoghaibi/JevDB.git jevdb
+cd jevdb
+docker compose up -d        # Postgres
+cd web && bun install && bun run db:migrate && bun run dev
+`}
+      />
+      <p>
+        Then point the SDK at your instance with <code>JEVDB_URL=http://localhost:3000</code> (the
+        SDK default). Everything else in these docs works the same.
+      </p>
+    </section>
+  );
+}
+
 function Configuration() {
   return (
     <section id="configuration" className="doc">
       <h2>Configuration</h2>
       <p>
-        Everything is set with environment variables in <code>.env</code>. The defaults work
-        out of the box with Docker Compose.
+        Self-hosting only. JevDB Cloud is configured for you. Set these in{" "}
+        <code>web/.env.local</code>.
       </p>
       <DocTable
         head={["Variable", "Default", "Description"]}
         rows={[
           ["DATABASE_URL", "(compose Postgres)", "Postgres connection string"],
-          ["JEVDB_PORT", "8080", "Port the proxy listens on"],
-          ["JEVDB_UPSTREAM_URL", "(Jev API)", "Where requests are forwarded"],
+          ["BETTER_AUTH_URL", "http://localhost:3000", "Where the dashboard is served"],
           ["JEVDB_RETENTION_DAYS", "30", "Delete logs older than this; 0 keeps forever"],
           ["JEVDB_RETRIEVAL", "off", "Experimental retrieval, see below"],
         ]}
@@ -296,35 +353,8 @@ function Retrieval() {
         can compare results with and without it.
       </p>
       <p>
-        Interested in testing this? Open an issue with what you tried and what changed.
+        Full guide, walkthrough and options: <a href="/docs/rag">Retrieval (RAG)</a>.
       </p>
     </section>
-  );
-}
-
-function DocTable({ head, rows }: { head: string[]; rows: string[][] }) {
-  return (
-    <div className="doc__table">
-      <table className="table">
-        <thead>
-          <tr>
-            {head.map((h) => (
-              <th key={h}>{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row[0]}>
-              {row.map((cell, i) => (
-                <td key={i} className={i === 0 ? "mono" : undefined}>
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
   );
 }

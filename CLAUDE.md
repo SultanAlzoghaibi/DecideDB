@@ -19,21 +19,25 @@ web/                  Next.js (App Router) — the only server. See web/CLAUDE.m
   app/api/auth/         Better Auth endpoints (sign up/in/out, OAuth callbacks)
   app/login/ app/console/  login page + logged-in console (stub; usage goes here)
   lib/auth.ts lib/session.ts lib/db.ts  auth config, getProfile()/requireProfile(), shared pg Pool
+  lib/decisions.ts      saveDecision() + dashboard queries; every query filters by profile_id
+  app/console/decisions/  decisions dashboard (list + detail), behind login
+  scripts/              bun run db:migrate | db:seed [--demo --reset --email] | db:reset
   proxy.ts              quick cookie check, redirects /console to /login
   components/ hooks/ styles/ lib/
 sdk/
-  js/                 @jevdb/sdk — TypeScript, zero deps
-  python/             jevdb — standard library only, zero deps
+  js/                 @jevdb/sdk — TypeScript, wraps @typesafe-ai/sdk (its only dependency)
+  python/             jevdb — wraps typesafe-sdk (its only dependency)
 db/migrations/        SQL, run in order (docker compose runs them on a fresh volume)
-docker-compose.yml    local Postgres on host port 5433
+docker-compose.yml    local Postgres on host port 5433 (override with JEVDB_PG_PORT in a root .env); data persists in the pgdata volume
 notes/                planning notes
 ```
 - **Decided (2026-09-26): everything is Next.js + Bun.** One Next.js app serves the landing/docs, the dashboard, SDK ingest and the dashboard API. Rust/Axum and Hono are dropped. Don't reopen unless the developer asks.
 - Product is an SDK (JS + Python) that logs asynchronously to JevDB, NOT a proxy in front of Jev. The user's app calls Jev itself, then `jevdb.log()` POSTs request + response to `<JEVDB_URL>/ingest/response`. The hosted URL is TODO; default is `http://localhost:3000`.
 - **Decided:** Postgres must be PRIVATE (no public IP). Hosting = Cloud Run + private Cloud SQL (us-west1 Oregon, Direct VPC egress). Vercel is out. Next.js builds with `output: "standalone"` for the container. Region: us-west (Oregon), same as Jev.
 - **Decided (2026-09-27): dashboard login built early**, ahead of logging/UI/grading, at the developer's request. Better Auth + our Postgres; the logged-in identity is a **profile** (`profile` table, `profile_id` FKs, `profileId` in code). Email + password always on; GitHub/Google only when their env keys are set. Env: `web/.env.local` (template `web/.env.example`).
+- **Every data table has `profile_id`; every query must filter by the logged-in profile** (`requireProfile()` → `profileId`). Never return rows without that filter.
 - Only server code (route handlers in `web/app/`, helpers in `web/lib/`) touches Postgres. React components never do, and there is no business logic in them.
-- **Every query on data tables goes through `withProfile(profileId, fn)`** (`web/lib/db.ts`), and every inserted row sets `profile_id`. Never query data tables with `pool` directly (it's only for Better Auth). This is what lets RLS drop in later without app changes.
+- **New data-table queries go through `withProfile(profileId, fn)`** (`web/lib/db.ts`), and every inserted row sets `profile_id`. This is what lets RLS drop in later without app changes. TODO before RLS: `lib/decisions.ts` and `lib/rag.ts` still use `pool` directly (with a `profile_id` filter); move them to `withProfile()`.
 - Learning mode: scaffold + TODOs. The developer writes the `/ingest/response` handler body (validation + Postgres write); AI writes the rest and explains it.
 
 ## About the developer

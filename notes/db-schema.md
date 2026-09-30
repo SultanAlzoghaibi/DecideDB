@@ -40,7 +40,7 @@ states ──< requests ──< answers >── question_versions >── instru
 - Free-form content: `text` if string, `body` JSONB if structured (Jev allows both)
 - `blob_req` / `blob_response` (keyed by `req_id`) — blob backup tables, top of each file, droppable
 
-## Ownership (`db/migrations/0004_profile_ownership.sql`)
+## Ownership (`db/migrations/0004_profiles_context.sql`)
 - Every data table above has `profile_id` (NOT NULL, FK -> `profile`, ON DELETE CASCADE). On every table, not just `requests`, so RLS is one rule per table with no joins.
 - Dedup hashes are unique per `(profile_id, hash)`, never shared across profiles.
 - App side: query data tables only via `withProfile(profileId, fn)` in `web/lib/db.ts`. It runs one transaction with `app.current_profile_id` set (transaction-local, safe with pooling). RLS policies (planned) will read that setting.
@@ -51,8 +51,20 @@ Owned by Better Auth (`web/lib/auth.ts`); regenerate with its CLI, don't hand-ed
 - `session` (logged-in browsers), `account` (login methods; `password` is a hash), `verification` (short-lived codes).
 - Better Auth's own columns are camelCase (`"emailVerified"`), so quote them in SQL.
 
+## Ownership, caller info and context (`db/migrations/0004_profiles_context.sql`)
+- **Every data table has `profile_id`** (FK to `profile`, cascade delete). Every query filters by it; the dashboard only ever shows the logged-in profile's rows. It's on child tables too, so RLS can later check each table directly.
+- Dedupe is per profile: `UNIQUE (profile_id, hash)` on `states`, `instructions`, `question_versions`.
+- `requests` also holds what the SDK sends: `decision_id` (unique per profile, makes retried sends a no-op), `started_at`, `latency_ms`, `user_id`, `group_id`, `sdk`, and `context_added`.
+- `request_tags (request_id, tag)`: any number of free labels per call.
+- `context`: when JevDB auto-adds context to a call (retrieval examples), the exact added context (`body` JSONB), its `source` and `example_set`; one per request. `requests.context_added` is true exactly when a `context` row exists.
+- Code: `web/lib/decisions.ts` (`saveDecision`, `listDecisions`, `getDecision`). Dummy data: `bun run db:seed` in `web/`.
+
+## Applying migrations
+Docker runs `db/migrations/*.sql` only on a fresh volume. After that: `bun run db:migrate` (in `web/`) applies new files and records them in `schema_migrations`. When adding a migration, also add its "already applied?" check to `APPLIED_IF` in `web/scripts/migrate.ts`.
+
 ## Later
 - `projects.profile_id` (owner) -> projects own requests, API keys, etc.
 - RLS policies + restricted app DB role (before hosted launch)
+- `project_id` on all tables (profiles own projects), optional
 - Partition `requests` by month
 - Never store the `Authorization` header
