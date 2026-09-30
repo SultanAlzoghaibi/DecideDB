@@ -5,6 +5,7 @@ import { ConsoleTabs } from "@/components/ConsoleTabs";
 import { requireProfile } from "@/lib/session";
 import { getRagSetting } from "@/lib/rag";
 import { saveRagAction } from "../actions";
+import { RagSettingsForm } from "@/components/rag/RagSettingsForm";
 import "@/styles/auth.css";
 import "@/styles/decisions.css";
 
@@ -34,88 +35,24 @@ export default async function RagGroupPage({ params }: { params: Promise<{ group
         <div className="rag__detail">
           <section className="console__card">
             <h2>Settings</h2>
-            <form action={saveRagAction} className="rag__form">
-              <input type="hidden" name="group_id" value={s.groupId} />
-
-              <fieldset className="rag__modes">
-                <legend className="field__label">Augment context</legend>
-                <label className="rag__choice">
-                  <input type="radio" name="mode" value="off" defaultChecked={!s.enabled} />
-                  <span>
-                    <span className="rag__title"><strong>Off</strong> <span className="badge">Default</span></span>
-                    <span className="rag__hint">Jev calls are sent exactly as your app wrote them</span>
-                  </span>
-                </label>
-                <label className="rag__choice">
-                  <input type="radio" name="mode" value="automatic" defaultChecked={s.enabled && s.mode === "automatic"} />
-                  <span>
-                    <span className="rag__title"><strong>A · Automatic</strong> <span className="tag tag--warn">Experimental</span></span>
-                    <span className="rag__hint">Your best-graded past decisions in this group</span>
-                  </span>
-                </label>
-                <label className="rag__choice">
-                  <input type="radio" name="mode" value="custom" defaultChecked={s.enabled && s.mode === "custom"} />
-                  <span>
-                    <span className="rag__title"><strong>B · Custom</strong> <span className="tag tag--warn">Experimental</span></span>
-                    <span className="rag__hint">
-                      Examples you pick by hand · <a href="/docs/rag/custom-examples">how to set them up</a>
-                    </span>
-                  </span>
-                </label>
-                <label className="rag__choice">
-                  <input type="radio" name="mode" value="both" defaultChecked={s.enabled && s.mode === "both"} />
-                  <span>
-                    <span className="rag__title"><strong>Both</strong> <span className="tag tag--warn">Experimental</span></span>
-                    <span className="rag__hint">Custom first, then automatic to fill up</span>
-                  </span>
-                </label>
-              </fieldset>
-
-              <div className="rag__fields">
-                <label className="field">
-                  <span className="field__label">Min grade score (0–1)</span>
-                  <input className="input" type="number" name="min_score" min={0} max={1} step={0.05} defaultValue={s.minScore} />
-                </label>
-                <label className="field">
-                  <span className="field__label">Max examples per call</span>
-                  <input className="input" type="number" name="max_examples" min={1} max={10} defaultValue={s.maxExamples} />
-                </label>
-              </div>
-              <label className="rag__toggle">
-                <input type="checkbox" name="same_tags" defaultChecked={s.sameTags} />
-                <span>
-                  <strong>Only same tags</strong>
-                  <span className="rag__hint">Examples must share the call&apos;s tags (e.g. prod)</span>
-                </span>
-              </label>
-
-              <button className="btn btn--primary" type="submit">Save</button>
-            </form>
+            <RagSettingsForm
+              groupId={s.groupId}
+              enabled={s.enabled}
+              mode={s.mode}
+              minScore={s.minScore}
+              maxExamples={s.maxExamples}
+              sameTags={s.sameTags}
+              action={saveRagAction}
+            />
           </section>
 
           <aside className="console__card rag__help">
             <h2>How it works</h2>
-            <p>
-              When augment context is not Off, the SDK adds up to <strong>{s.maxExamples}</strong> examples to the{" "}
-              <code>state</code> of every Jev call in <span className="mono">{s.groupId}</span>. Examples are cached in
-              the SDK, so most calls need no extra network trip.
-            </p>
-            <dl className="rag__defs">
-              <dt>Off (default)</dt>
-              <dd>Nothing is added. Your calls go to Jev unchanged.</dd>
-              <dt>A · Automatic</dt>
-              <dd>Graded decisions from this group scoring at least the min score. Highest first.</dd>
-              <dt>B · Custom</dt>
-              <dd>
-                Hand-written examples, always included. <a href="/docs/rag/custom-examples">Setup docs →</a>
-              </dd>
-              <dt>Min grade score</dt>
-              <dd>Higher = fewer but better examples. Start around 0.8.</dd>
-              <dt>Max examples</dt>
-              <dd>More examples = more context and tokens per call. 3 is a good start.</dd>
-              <dt>Only same tags</dt>
-              <dd>Keeps prod calls learning from prod, experiments from experiments.</dd>
-            </dl>
+            <ol className="rs-how">
+              <li>You grade calls good or bad (API or dashboard).</li>
+              <li>The best ones become examples for this group.</li>
+              <li>The SDK adds them to each new Jev call. Cached, so no extra wait.</li>
+            </ol>
             <p className="rag__hint">
               Experimental: it can help, hurt or do nothing. Compare grades with it on and off.{" "}
               <a href="/docs/rag">Full guide →</a>
