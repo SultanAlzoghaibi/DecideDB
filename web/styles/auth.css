@@ -191,3 +191,128 @@
   font-size: 14px;
   text-align: center;
 }
+
+/* /console/rag */
+.rag__summary {
+  font-size: 13px;
+}
+.rag__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.rag__search {
+  flex: 1;
+  min-width: 240px;
+  margin: 0;
+}
+.rag__add {
+  display: flex;
+  gap: var(--space-2);
+}
+.rag__add .input {
+  width: 180px;
+  padding: 6px var(--space-3);
+  font-size: 13px;
+}
+.rag__table td,
+.rag__table th {
+  white-space: nowrap;
+}
+.rag__num {
+  text-align: right;
+}
+.rag__row {
+  position: relative;
+  cursor: pointer;
+}
+.rag__row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+/* The link's hit area covers the whole row. */
+.rag__rowlink {
+  color: var(--color-paper);
+}
+.rag__rowlink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.rag__detail {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+@media (max-width: 800px) {
+  .rag__detail {
+    grid-template-columns: 1fr;
+  }
+}
+.rag__form {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+}
+.rag__toggle,
+.rag__choice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--color-mist);
+  font-size: 14px;
+}
+.rag__toggle input,
+.rag__choice input {
+  margin-top: 3px;
+}
+.rag__toggle > span,
+.rag__choice > span {
+  display: grid;
+  gap: 2px;
+}
+.rag__hint {
+  color: var(--color-fog);
+  font-size: 13px;
+}
+.rag__modes {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.rag__modes legend {
+  margin-bottom: var(--space-2);
+}
+.rag__fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+.rag__help p {
+  margin: 0 0 var(--space-3);
+  color: var(--color-mist);
+  font-size: 14px;
+}
+.rag__defs {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-4);
+  font-size: 13px;
+}
+.rag__defs dt {
+  margin-top: var(--space-2);
+  color: var(--color-paper);
+}
+.rag__defs dd {
+  margin: 0;
+  color: var(--color-fog);
+}
+.rag__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}

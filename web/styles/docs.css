@@ -1,8 +1,8 @@
 /* ---------- Docs layout ---------- */
 .docs {
   display: grid;
-  grid-template-columns: 200px minmax(0, 720px);
-  gap: var(--space-16);
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: var(--space-10);
   padding-top: var(--space-12);
 }
 
@@ -207,4 +207,130 @@
   color: var(--color-paper);
   font-size: 16px;
   font-weight: var(--weight-medium);
+}
+
+/* ---------- Docs tree (sidebar) ---------- */
+.docs__tree {
+  margin-bottom: var(--space-6);
+}
+.docs__link--child {
+  padding-left: calc(var(--space-3) + var(--space-4));
+}
+
+/* ---------- SDK pages ---------- */
+.sdk-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.sdk-head h1 {
+  margin: 0;
+}
+.sdk-head__toggle {
+  margin: 0;
+}
+
+/* TL;DR box at the top of every section. */
+.tldr {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-3);
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-carbon);
+}
+.tldr__label {
+  color: var(--color-fog);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 22px;
+}
+.doc .tldr p {
+  margin: 0;
+  color: var(--color-paper);
+  font-size: 14px;
+}
+.tldr__copy {
+  grid-column: 2;
+  justify-self: start;
+  font-size: 12px;
+}
+
+.sdk-steps {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-6) 0;
+  padding-left: var(--space-6);
+  color: var(--color-mist);
+}
+
+.sdk-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+.sdk-card {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-5, 20px);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-carbon);
+  color: var(--color-mist);
+  transition: border-color 120ms ease;
+}
+.sdk-card:hover,
+.sdk-card:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+}
+.sdk-card__title {
+  color: var(--color-paper);
+  font-size: 16px;
+  font-weight: var(--weight-medium);
+}
+.sdk-card__body {
+  color: var(--color-fog);
+  font-size: 13px;
+}
+.sdk-card code {
+  justify-self: start;
+  font-size: 12px;
+}
+
+/* Sync warning popup. */
+.sdk-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgba(8, 9, 10, 0.7);
+}
+.sdk-modal__card {
+  width: min(420px, 100%);
+  padding: var(--space-6);
+  border: 1px solid var(--color-smoke);
+  border-radius: var(--radius-card);
+  background: var(--color-obsidian);
+}
+.sdk-modal__card h2 {
+  margin: 0 0 var(--space-2);
+  color: var(--color-paper);
+  font-size: 16px;
+  font-weight: var(--weight-medium);
+}
+.sdk-modal__card p {
+  margin: 0 0 var(--space-5, 20px);
+  color: var(--color-mist);
+  font-size: 14px;
+}
+.sdk-modal__actions {
+  display: flex;
+  gap: var(--space-2);
 }

@@ -1,5 +1,7 @@
 // Illustrative preview of the dashboard's requests table. Sample data only.
 
+import { ConfidenceBar } from "./decisions/ConfidenceBar";
+
 type Grade = "good" | "bad" | null;
 
 type Row = {
@@ -53,7 +55,7 @@ export function RequestsPreview() {
                 </td>
                 <td className="mono">{row.answer}</td>
                 <td className="hide-sm">
-                  <Confidence value={row.confidence} />
+                  <ConfidenceBar value={row.confidence} />
                 </td>
                 <td>
                   <GradeBadge grade={row.grade} />
@@ -66,17 +68,6 @@ export function RequestsPreview() {
 
       <figcaption className="preview__caption">Sample data</figcaption>
     </figure>
-  );
-}
-
-function Confidence({ value }: { value: number }) {
-  return (
-    <span className="confidence">
-      <span className="confidence__track">
-        <span className="confidence__fill" style={{ width: `${value * 100}%` }} />
-      </span>
-      <span className="mono">{value.toFixed(2)}</span>
-    </span>
   );
 }
 

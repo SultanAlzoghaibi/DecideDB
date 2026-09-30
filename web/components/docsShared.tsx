@@ -26,19 +26,26 @@ export function useActiveSection(ids: string[]) {
   return active;
 }
 
-// Links to the other docs pages, shown at the top of every docs sidebar.
+// The docs tree, shown at the top of every docs sidebar. Children are indented.
 export const DOC_PAGES = [
-  { href: "/docs", label: "Overview" },
-  { href: "/docs/sdk", label: "Client SDK" },
+  { href: "/docs", label: "Overview", depth: 0 },
+  { href: "/docs/sdk", label: "SDK", depth: 0 },
+  { href: "/docs/sdk/python", label: "Python", depth: 1 },
+  { href: "/docs/sdk/js", label: "JS / TS", depth: 1 },
+  { href: "/docs/rag", label: "Retrieval (RAG)", depth: 0 },
 ];
 
 export function DocsNav({ current }: { current: string }) {
   return (
     <>
       <p className="docs__group">Docs</p>
-      <nav>
+      <nav className="docs__tree">
         {DOC_PAGES.map((p) => (
-          <a key={p.href} href={p.href} className={`docs__link${p.href === current ? " docs__link--active" : ""}`}>
+          <a
+            key={p.href}
+            href={p.href}
+            className={`docs__link${p.depth ? " docs__link--child" : ""}${p.href === current ? " docs__link--active" : ""}`}
+          >
             {p.label}
           </a>
         ))}

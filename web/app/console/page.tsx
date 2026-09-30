@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Nav } from "@/components/Nav";
 import { SignOutButton } from "@/components/SignOutButton";
+import { ConsoleTabs } from "@/components/ConsoleTabs";
 import { requireProfile } from "@/lib/session";
 import "@/styles/auth.css";
+import "@/styles/decisions.css";
 
 export const metadata: Metadata = { title: "Console · JevDB" };
 
@@ -19,6 +21,7 @@ export default async function ConsolePage() {
           <h1 className="console__title">Console</h1>
           <SignOutButton />
         </div>
+        <ConsoleTabs current="/console" />
 
         <section className="console__card">
           <h2>Profile</h2>
@@ -35,7 +38,8 @@ export default async function ConsolePage() {
         <section className="console__card">
           <h2>Usage</h2>
           <p className="console__empty">
-            Your usage will show here: Jev calls logged, tokens and grades.
+            Your usage will show here: Jev calls logged, tokens and grades.{" "}
+            <a href="/console/decisions">Browse your decisions →</a>
           </p>
         </section>
       </main>
