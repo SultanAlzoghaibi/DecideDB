@@ -19,10 +19,12 @@
 - [ ] Show grades in table
 
 ## Multi-tenancy
-- [ ] Projects + `project_id` on all tables
+- [x] `profile_id` on every data table (`0004_profile_ownership.sql`) + `withProfile()` query helper
+- [ ] Projects (a profile owns several) — optional, later
 - [ ] Hashed, rotatable API keys
-- [ ] Postgres RLS (per-transaction context)
+- [ ] Postgres RLS (per-transaction context) — **before the hosted launch**. Needs: restricted `jevdb_app` DB role, `ENABLE ROW LEVEL SECURITY` + policy `profile_id = current_setting('app.current_profile_id')::uuid` on data tables (not on Better Auth tables)
 - [x] Web UI login (Better Auth: email + password, optional GitHub/Google) → `/console` stub
+- [x] Email verification for email + password sign-ups: 4-digit code (Better Auth `emailOTP`), sent via Resend (`web/lib/email.ts`); dev without `RESEND_API_KEY` prints codes in the terminal
 
 ## Scale / Ops
 - [ ] PgBouncer pooling

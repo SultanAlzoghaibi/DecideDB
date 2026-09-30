@@ -91,6 +91,34 @@
   font-size: 13px;
 }
 
+.auth__notice {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-badge);
+  background: rgba(39, 166, 68, 0.12);
+  color: var(--color-good);
+  font-size: 13px;
+}
+
+.auth__email {
+  color: var(--color-paper);
+  font-weight: var(--weight-medium);
+  overflow-wrap: anywhere;
+}
+
+/* The 4-digit code: big, spaced mono digits. */
+.auth__code {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  letter-spacing: 0.5em;
+  text-align: center;
+}
+
+.auth__switch button:disabled {
+  color: var(--color-fog);
+  cursor: default;
+}
+
 /* ---------- Form fields ---------- */
 .field {
   display: grid;

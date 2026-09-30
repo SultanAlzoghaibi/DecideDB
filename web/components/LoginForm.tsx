@@ -2,8 +2,9 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
+import { authClient, NETWORK_ERROR } from "@/lib/auth-client";
 import { GitHubIcon, GoogleIcon } from "./ProviderIcons";
+import { VerifyEmailForm } from "./VerifyEmailForm";
 
 type Mode = "signin" | "signup";
 type Provider = "github" | "google";
@@ -12,8 +13,6 @@ const PROVIDERS: Record<Provider, { label: string; Icon: () => React.ReactElemen
   google: { label: "Continue with Google", Icon: GoogleIcon },
   github: { label: "Continue with GitHub", Icon: GitHubIcon },
 };
-
-const NETWORK_ERROR = "Couldn't reach JevDB. Check your connection and try again.";
 
 // Email + password form, plus a button per OAuth provider the server has keys for.
 export function LoginForm({
@@ -27,6 +26,10 @@ export function LoginForm({
   const [mode, setMode] = useState<Mode>("signin");
   const [error, setError] = useState<string | null>(initialError);
   const [pending, setPending] = useState(false);
+  // Set when the next step is typing the emailed code.
+  const [verify, setVerify] = useState<{ email: string; reason: "signup" | "unverified" } | null>(
+    null,
+  );
 
   // Pressing Back from Google/GitHub can restore this page from the browser's
   // back-forward cache with the buttons still disabled; re-enable them.
@@ -46,7 +49,7 @@ export function LoginForm({
 
     setPending(true);
     setError(null);
-    let error: { message?: string } | null;
+    let error: { message?: string; code?: string } | null;
     try {
       ({ error } =
         mode === "signup"
@@ -57,9 +60,21 @@ export function LoginForm({
       error = { message: NETWORK_ERROR };
     }
 
+    // Unconfirmed email: the server just emailed a fresh code, so ask for it.
+    if (error?.code === "EMAIL_NOT_VERIFIED") {
+      setPending(false);
+      setVerify({ email, reason: "unverified" });
+      return;
+    }
     if (error) {
       setPending(false);
       setError(error.message ?? "Something went wrong. Try again.");
+      return;
+    }
+    // Sign-up worked but isn't logged in yet: the code was emailed, confirm it first.
+    if (mode === "signup") {
+      setPending(false);
+      setVerify({ email, reason: "signup" });
       return;
     }
     // Stay disabled while navigating, so a second click can't submit again.
@@ -82,6 +97,19 @@ export function LoginForm({
       setPending(false);
       setError(NETWORK_ERROR);
     }
+  }
+
+  if (verify) {
+    return (
+      <VerifyEmailForm
+        email={verify.email}
+        reason={verify.reason}
+        onBack={() => {
+          setVerify(null);
+          setError(null);
+        }}
+      />
+    );
   }
 
   const isSignup = mode === "signup";

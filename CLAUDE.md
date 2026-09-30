@@ -33,6 +33,7 @@ notes/                planning notes
 - **Decided:** Postgres must be PRIVATE (no public IP). Hosting = Cloud Run + private Cloud SQL (us-west1 Oregon, Direct VPC egress). Vercel is out. Next.js builds with `output: "standalone"` for the container. Region: us-west (Oregon), same as Jev.
 - **Decided (2026-09-27): dashboard login built early**, ahead of logging/UI/grading, at the developer's request. Better Auth + our Postgres; the logged-in identity is a **profile** (`profile` table, `profile_id` FKs, `profileId` in code). Email + password always on; GitHub/Google only when their env keys are set. Env: `web/.env.local` (template `web/.env.example`).
 - Only server code (route handlers in `web/app/`, helpers in `web/lib/`) touches Postgres. React components never do, and there is no business logic in them.
+- **Every query on data tables goes through `withProfile(profileId, fn)`** (`web/lib/db.ts`), and every inserted row sets `profile_id`. Never query data tables with `pool` directly (it's only for Better Auth). This is what lets RLS drop in later without app changes.
 - Learning mode: scaffold + TODOs. The developer writes the `/ingest/response` handler body (validation + Postgres write); AI writes the rest and explains it.
 
 ## About the developer
@@ -47,7 +48,7 @@ notes/                planning notes
 
 ## Build order
 SDK + `/ingest/response` + Postgres logging (hardcoded API key) -> web UI table -> grading -> real API keys / multi-tenancy -> experimental retrieval.
-Don't build later steps early. RLS, PgBouncer, partitioning and column encryption are deferred until there are users.
+Don't build later steps early. PgBouncer, partitioning and column encryption are deferred until there are users. RLS is deferred too, but must be on **before the hosted launch** (`profile_id` columns + `withProfile()` are already in place for it).
 
 ## Rules
 - SDKs stay dependency-free and must never throw into or slow down the user's app (fire-and-forget + `flush()`).

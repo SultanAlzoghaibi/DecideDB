@@ -1,36 +1,39 @@
 "use client";
 
 import { useCopy } from "@/hooks/useCopy";
+import { highlight, langFromLabel, type Lang } from "@/lib/highlight";
 
 type Props = {
   label: string;
   code: string;
+  lang?: Lang; // defaults to a guess from the label ("main.py" -> python)
 };
 
-// Plain code block. Comment lines (# or //) are dimmed; no full syntax highlighting.
-export function CodeBlock({ label, code }: Props) {
+// Code block with JetBrains Darcula-style syntax colors (Python, TS/JS, JSON, terminal).
+export function CodeBlock({ label, code, lang }: Props) {
   const { copied, copy } = useCopy();
-  const lines = code.trim().split("\n");
+  const source = code.trim();
+  const tokens = highlight(source, lang ?? langFromLabel(label));
 
   return (
     <figure className="code">
       <div className="code__bar">
         <span>{label}</span>
-        <button type="button" className="code__copy" onClick={() => copy(code.trim())}>
+        <button type="button" className="code__copy" onClick={() => copy(source)}>
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
       <pre className="code__body">
         <code>
-          {lines.map((line, i) => {
-            const isComment = /^\s*(#|\/\/)/.test(line);
-            return (
-              <span key={i} className={isComment ? "code__comment" : undefined}>
-                {line}
-                {"\n"}
+          {tokens.map((t, i) =>
+            t.kind ? (
+              <span key={i} className={`tok tok--${t.kind}`}>
+                {t.text}
               </span>
-            );
-          })}
+            ) : (
+              t.text
+            ),
+          )}
         </code>
       </pre>
     </figure>

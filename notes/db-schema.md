@@ -31,7 +31,7 @@ states ──< requests ──< answers >── question_versions >── instru
                │           └──< grades
                └──< request_questions >── question_versions
 ```
-- `states`, `instructions` — deduped by hash
+- `states`, `instructions` — deduped by hash, **per profile**
 - `question_versions` — key + type + instructions + criteria; new wording = new version
 - `criteria` — 1 row per choice option / score level / noul true-false
 - `answers` + `*_answers` — base row + per-type values
@@ -39,6 +39,11 @@ states ──< requests ──< answers >── question_versions >── instru
 - `grades` — good/bad per answer
 - Free-form content: `text` if string, `body` JSONB if structured (Jev allows both)
 - `blob_req` / `blob_response` (keyed by `req_id`) — blob backup tables, top of each file, droppable
+
+## Ownership (`db/migrations/0004_profile_ownership.sql`)
+- Every data table above has `profile_id` (NOT NULL, FK -> `profile`, ON DELETE CASCADE). On every table, not just `requests`, so RLS is one rule per table with no joins.
+- Dedup hashes are unique per `(profile_id, hash)`, never shared across profiles.
+- App side: query data tables only via `withProfile(profileId, fn)` in `web/lib/db.ts`. It runs one transaction with `app.current_profile_id` set (transaction-local, safe with pooling). RLS policies (planned) will read that setting.
 
 ## Auth (`db/migrations/0003_auth.sql`)
 Owned by Better Auth (`web/lib/auth.ts`); regenerate with its CLI, don't hand-edit.
@@ -48,6 +53,6 @@ Owned by Better Auth (`web/lib/auth.ts`); regenerate with its CLI, don't hand-ed
 
 ## Later
 - `projects.profile_id` (owner) -> projects own requests, API keys, etc.
-- `project_id` on all tables + RLS
+- RLS policies + restricted app DB role (before hosted launch)
 - Partition `requests` by month
 - Never store the `Authorization` header
