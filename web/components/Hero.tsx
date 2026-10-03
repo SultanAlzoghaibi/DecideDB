@@ -1,5 +1,6 @@
 import { CopyCommand } from "./CopyCommand";
 import { RequestsPreview } from "./RequestsPreview";
+import { RollingWord } from "./RollingWord";
 
 export function Hero() {
   return (
@@ -10,7 +11,9 @@ export function Hero() {
       </p>
 
       <h1 className="hero__title">
-        <span className="hero__title-muted">Jev forgets every call.</span>
+        <span className="hero__title-muted">
+          <RollingWord words={["Jev", "Decision API"]} /> forgets every call.
+        </span>
         <br />
         DecideDB doesn't.
       </h1>
