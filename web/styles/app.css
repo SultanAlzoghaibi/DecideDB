@@ -211,6 +211,17 @@ code,
   color: var(--color-ash);
 }
 
+/* Keep "<rolling word> forgets every call." on one line so the heading never jumps
+   when the word changes length. Phones may still wrap. */
+@media (min-width: 720px) {
+  .hero__title {
+    max-width: none;
+  }
+  .hero__title-muted {
+    white-space: nowrap;
+  }
+}
+
 /* RollingWord: a one-line window; the track of words slides up inside it. */
 .roll {
   display: inline-block;
