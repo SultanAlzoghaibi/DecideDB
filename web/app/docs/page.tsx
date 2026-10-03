@@ -3,8 +3,8 @@ import { DocsPage } from "@/components/DocsPage";
 import "@/styles/docs.css";
 
 export const metadata: Metadata = {
-  title: "DecisionDB Docs",
-  description: "How to set up DecisionDB, connect your app, and grade Jev decisions.",
+  title: "DecideDB Docs",
+  description: "How to set up DecideDB, connect your app, and grade Jev decisions.",
 };
 
 export default function Docs() {

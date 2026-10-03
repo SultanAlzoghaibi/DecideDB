@@ -1,16 +1,16 @@
-"""DecisionDB clients: TypeSafe's Jev client, plus a copy of every call sent to DecisionDB.
+"""DecideDB clients: TypeSafe's Jev client, plus a copy of every call sent to DecideDB.
 
-    with DecisionDB(user_id="user_482", group_id="support-bot", tags=["prod"]) as decisiondb:
-        response = decisiondb.system_one(state=..., questions=...)
-        decision_id = decisiondb.id_of(response)   # keep this to grade the decision later
+    with DecideDB(user_id="user_482", group_id="support-bot", tags=["prod"]) as decidedb:
+        response = decidedb.system_one(state=..., questions=...)
+        decision_id = decidedb.id_of(response)   # keep this to grade the decision later
 
-    async with AsyncDecisionDB(...) as decisiondb:
-        response = await decisiondb.system_one(state=..., questions=...)
+    async with AsyncDecideDB(...) as decidedb:
+        response = await decidedb.system_one(state=..., questions=...)
 
 `system_one` takes exactly the same arguments as TypeSafe's `system_one`, plus optional
 per-call `user_id`, `group_id`, `tags` and `decision_id`. It calls Jev, hands the log to a
 background sender, and returns Jev's response unchanged. If Jev fails, the failure is logged
-and the original exception is re-raised, so your code behaves exactly as without DecisionDB.
+and the original exception is re-raised, so your code behaves exactly as without DecideDB.
 """
 
 from __future__ import annotations
@@ -49,7 +49,7 @@ class _Base:
     # ---- public ----
 
     def id_of(self, response: Any) -> Optional[str]:
-        """The DecisionDB decision id for a response returned by `system_one` (for grading later)."""
+        """The DecideDB decision id for a response returned by `system_one` (for grading later)."""
         hit = self._ids.get(id(response))
         return hit[1] if hit and hit[0] is response else None
 
@@ -104,7 +104,7 @@ class _Base:
         )
 
 
-class DecisionDB(_Base):
+class DecideDB(_Base):
     """Synchronous client. Wraps `typesafe_sdk.TypeSafeClient`."""
 
     def __init__(
@@ -121,13 +121,13 @@ class DecisionDB(_Base):
         on_error: Optional[Callable[[Exception], None]] = None,
     ) -> None:
         """
-        api_key      DecisionDB API key (default: DECISIONDB_API_KEY). Only ever sent to DecisionDB.
+        api_key      DecideDB API key (default: DECIDEDB_API_KEY). Only ever sent to DecideDB.
         jev_api_key  Jev API key (default: TYPESAFE_API_KEY). Only ever sent to Jev.
-        base_url     DecisionDB URL (default: DECISIONDB_URL).
+        base_url     DecideDB URL (default: DECIDEDB_URL).
         user_id, group_id, tags   Attached to every call; override per call in `system_one`.
         model        Default Jev model (default: TypeSafe's default / TYPESAFE_DEFAULT_MODEL).
         jev_client   Bring your own TypeSafeClient instead (then jev_api_key/model are ignored,
-                     and DecisionDB won't close it for you).
+                     and DecideDB won't close it for you).
         on_error     Called with the exception when a log can't be sent (default: print a warning).
         """
         super().__init__(
@@ -147,7 +147,7 @@ class DecisionDB(_Base):
         decision_id: Optional[str] = None,
         **kwargs: Any,
     ) -> Any:
-        """Same as `TypeSafeClient.system_one`, plus per-call DecisionDB metadata."""
+        """Same as `TypeSafeClient.system_one`, plus per-call DecideDB metadata."""
         meta = self._meta(user_id, group_id, tags)
         did = decision_id or _record.new_id()
         started_at, t0 = _record.now_iso(), time.perf_counter()
@@ -166,19 +166,19 @@ class DecisionDB(_Base):
         self._sender.flush()
 
     def close(self) -> None:
-        """Send pending logs, and close the Jev client if DecisionDB created it."""
+        """Send pending logs, and close the Jev client if DecideDB created it."""
         self.flush()
         if self._owns_jev:
             self._jev.close()
 
-    def __enter__(self) -> "DecisionDB":
+    def __enter__(self) -> "DecideDB":
         return self
 
     def __exit__(self, *exc: Any) -> None:
         self.close()
 
 
-class AsyncDecisionDB(_Base):
+class AsyncDecideDB(_Base):
     """Asynchronous client. Wraps `typesafe_sdk.AsyncTypeSafeClient`."""
 
     def __init__(
@@ -194,7 +194,7 @@ class AsyncDecisionDB(_Base):
         jev_client: Optional[AsyncTypeSafeClient] = None,
         on_error: Optional[Callable[[Exception], None]] = None,
     ) -> None:
-        """Same options as `DecisionDB`, with an `AsyncTypeSafeClient`."""
+        """Same options as `DecideDB`, with an `AsyncTypeSafeClient`."""
         super().__init__(
             api_key=api_key, base_url=base_url, user_id=user_id, group_id=group_id, tags=tags, on_error=on_error
         )
@@ -212,7 +212,7 @@ class AsyncDecisionDB(_Base):
         decision_id: Optional[str] = None,
         **kwargs: Any,
     ) -> Any:
-        """Same as `AsyncTypeSafeClient.system_one`, plus per-call DecisionDB metadata."""
+        """Same as `AsyncTypeSafeClient.system_one`, plus per-call DecideDB metadata."""
         meta = self._meta(user_id, group_id, tags)
         did = decision_id or _record.new_id()
         started_at, t0 = _record.now_iso(), time.perf_counter()
@@ -232,12 +232,12 @@ class AsyncDecisionDB(_Base):
         await asyncio.to_thread(self._sender.flush)
 
     async def aclose(self) -> None:
-        """Send pending logs, and close the Jev client if DecisionDB created it."""
+        """Send pending logs, and close the Jev client if DecideDB created it."""
         await self.flush()
         if self._owns_jev:
             await self._jev.aclose()
 
-    async def __aenter__(self) -> "AsyncDecisionDB":
+    async def __aenter__(self) -> "AsyncDecideDB":
         return self
 
     async def __aexit__(self, *exc: Any) -> None:

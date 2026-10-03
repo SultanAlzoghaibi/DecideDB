@@ -8,4 +8,4 @@ export const authClient = createAuthClient({
 });
 
 // The client throws (instead of returning an error) when the server can't be reached.
-export const NETWORK_ERROR = "Couldn't reach DecisionDB. Check your connection and try again.";
+export const NETWORK_ERROR = "Couldn't reach DecideDB. Check your connection and try again.";

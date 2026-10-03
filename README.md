@@ -1,6 +1,6 @@
-# DecisionDB
+# DecideDB
 
-> The "Supabase for Jev" — a self-hosted, open-source logging layer for TypeSafe's Jev API. A tiny SDK (JS or Python) sends every request/response to DecisionDB in the background, where it lands in Postgres, shows up in a web UI, and can be graded against real outcomes.
+> The "Supabase for Jev" — a self-hosted, open-source logging layer for TypeSafe's Jev API. A tiny SDK (JS or Python) sends every request/response to DecideDB in the background, where it lands in Postgres, shows up in a web UI, and can be graded against real outcomes.
 
 ## Why
 
@@ -34,14 +34,14 @@ This is **explicitly unproven**. TypeSafe's own docs warn that `state` is steera
 
 ```
 your app ──Jev call──────────────────────────▶ Jev API
-   │ decisiondb.log(request, response)  (background, never blocks)
+   │ decidedb.log(request, response)  (background, never blocks)
    ▼
-DecisionDB (Next.js on Bun) ── POST /ingest/response ──▶ Postgres
+DecideDB (Next.js on Bun) ── POST /ingest/response ──▶ Postgres
    ▲
 browser ── dashboard + /api/* ─┘
 ```
 
-- **SDK, not a proxy.** Your app keeps calling Jev directly, so DecisionDB can never add latency or downtime to a Jev call. The JS (`sdk/js`) and Python (`sdk/python`) SDKs queue each call and POST it to `/ingest/response` in the background.
+- **SDK, not a proxy.** Your app keeps calling Jev directly, so DecideDB can never add latency or downtime to a Jev call. The JS (`sdk/js`) and Python (`sdk/python`) SDKs queue each call and POST it to `/ingest/response` in the background.
 - **One Next.js app** (`web/`), run with Bun, serves the landing/docs, the dashboard, SDK ingest and the dashboard API.
 - **Postgres**, not a time-series DB. Normalized columns for hot-query fields (confidence, answer, timestamp) alongside raw JSONB for the full payload. SQL lives in `db/migrations/`.
 - **Multi-tenancy** via `project_id` + Postgres Row Level Security (RLS) as a database-level backstop beneath app-level checks. Tenant context is set fresh per-transaction so it stays safe with connection pooling.
@@ -59,13 +59,13 @@ Searched HN, Reddit, and the awesome-jev lists:
 
 - **jev-trust**, **jev-harness** — logging/monitoring, no retrieval loop.
 - **Jeview** — closest match: local proxy + SQLite + live dashboard. But explicitly localhost-only, no login, "not for public deployment."
-- **DecisionDB's gap:** Postgres-backed with RLS, built for safe multi-tenant hosting. No exact match found.
+- **DecideDB's gap:** Postgres-backed with RLS, built for safe multi-tenant hosting. No exact match found.
 
 LLM-world analogues worth studying: **Helicone** (proxy-based logging), **Langfuse** (open-source, Postgres, scores/grading), **LangSmith**.
 
 ## Naming & IP
 
-"DecisionDB" (renamed from JevDB on 2026-10-02). A generic name instead of a `jev-` prefix: no trademark risk from building on TypeSafe's product name, and it still fits if other decision models are supported later. Postgres user/database names and GitHub repo names still say `jevdb` until they are migrated or renamed.
+"DecideDB" (renamed from JevDB on 2026-10-02). A generic name instead of a `jev-` prefix: no trademark risk from building on TypeSafe's product name, and it still fits if other decision models are supported later. Postgres user/database names and GitHub repo names still say `jevdb` until they are migrated or renamed.
 
 ## Launch plan
 

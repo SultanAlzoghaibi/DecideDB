@@ -1,4 +1,4 @@
--- DecisionDB input side: what the user sent to Jev.
+-- DecideDB input side: what the user sent to Jev.
 -- Raw blob + fully structured decomposition. See notes/db-schema.md.
 -- Free-form content (state, instructions, criteria text) may be a string OR
 -- structured JSON in Jev, so those rows have `text` (plain string) or `body`

@@ -11,7 +11,7 @@ export async function sendEmail({ to, subject, text, html }: Email): Promise<voi
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     if (process.env.NODE_ENV === "production") {
-      throw new Error("RESEND_API_KEY is not set, so DecisionDB can't send email.");
+      throw new Error("RESEND_API_KEY is not set, so DecideDB can't send email.");
     }
     console.log(`\n[email: dev, not sent] to ${to}\n  subject: ${subject}\n  ${text}\n`);
     return;
@@ -21,7 +21,7 @@ export async function sendEmail({ to, subject, text, html }: Email): Promise<voi
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: process.env.EMAIL_FROM || "DecisionDB <onboarding@resend.dev>",
+      from: process.env.EMAIL_FROM || "DecideDB <onboarding@resend.dev>",
       to: [to],
       subject,
       text,
@@ -37,12 +37,12 @@ export async function sendEmail({ to, subject, text, html }: Email): Promise<voi
 // The 4-digit sign-up code email. Inline styles only: most email apps ignore <style>.
 export function verificationCodeEmail(code: string): Omit<Email, "to"> {
   return {
-    subject: `${code} is your DecisionDB code`,
-    text: `Your DecisionDB verification code is ${code}. It expires in 10 minutes. If you didn't sign up, ignore this email.`,
+    subject: `${code} is your DecideDB code`,
+    text: `Your DecideDB verification code is ${code}. It expires in 10 minutes. If you didn't sign up, ignore this email.`,
     html: `<div style="font-family:Inter,system-ui,sans-serif;max-width:420px;margin:0 auto;padding:32px 24px;color:#08090a">
-  <p style="margin:0 0 16px;font-size:15px">Your DecisionDB verification code:</p>
+  <p style="margin:0 0 16px;font-size:15px">Your DecideDB verification code:</p>
   <p style="margin:0 0 16px;font-size:36px;font-weight:600;letter-spacing:8px;font-family:'JetBrains Mono',ui-monospace,monospace">${code}</p>
-  <p style="margin:0;font-size:13px;color:#62666d">It expires in 10 minutes. If you didn't sign up for DecisionDB, you can ignore this email.</p>
+  <p style="margin:0;font-size:13px;color:#62666d">It expires in 10 minutes. If you didn't sign up for DecideDB, you can ignore this email.</p>
 </div>`,
   };
 }

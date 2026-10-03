@@ -1,7 +1,7 @@
 {
-  "name": "decisiondb-web",
+  "name": "decidedb-web",
   "version": "1.0.0",
-  "description": "DecisionDB web app: landing, docs, dashboard, SDK ingest and dashboard API",
+  "description": "DecideDB web app: landing, docs, dashboard, SDK ingest and dashboard API",
   "type": "module",
   "scripts": {
     "dev": "bun --bun next dev",

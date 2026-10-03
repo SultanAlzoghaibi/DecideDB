@@ -19,12 +19,12 @@ export function SdkOverview() {
             <h1>SDK</h1>
             <div className="tldr">
               <span className="tldr__label">TL;DR</span>
-              <p>Swap TypeSafe&apos;s Jev client for DecisionDB&apos;s. Same calls, same answers, and every call is saved.</p>
+              <p>Swap TypeSafe&apos;s Jev client for DecideDB&apos;s. Same calls, same answers, and every call is saved.</p>
             </div>
             <p>The SDK wraps TypeSafe&apos;s Jev client. You call Jev the same way you do today.</p>
             <p>Your app still talks to Jev directly. There is no proxy in between, so no added latency.</p>
             <p>
-              After each call, a copy of the request and response is sent to DecisionDB in the background. It&apos;s
+              After each call, a copy of the request and response is sent to DecideDB in the background. It&apos;s
               fire-and-forget: it never throws into your app. Call <code>flush()</code> on shutdown so the last
               copies get sent.
             </p>
@@ -37,7 +37,7 @@ export function SdkOverview() {
                 <strong>Jev</strong> answers. Your app gets the response right away.
               </li>
               <li>
-                <strong>DecisionDB</strong> logs it, in the background.
+                <strong>DecideDB</strong> logs it, in the background.
               </li>
             </ol>
 
@@ -45,12 +45,12 @@ export function SdkOverview() {
               <a href="/docs/sdk/python" className="sdk-card">
                 <span className="sdk-card__title">Python</span>
                 <span className="sdk-card__body">Async and sync clients. Wraps typesafe-sdk.</span>
-                <code>uv add decisiondb</code>
+                <code>uv add decidedb</code>
               </a>
               <a href="/docs/sdk/js" className="sdk-card">
                 <span className="sdk-card__title">JS / TS</span>
                 <span className="sdk-card__body">Node, Bun and TypeScript. Wraps @typesafe-ai/sdk.</span>
-                <code>bun add @decisiondb/sdk</code>
+                <code>bun add @decidedb/sdk</code>
               </a>
             </div>
           </section>

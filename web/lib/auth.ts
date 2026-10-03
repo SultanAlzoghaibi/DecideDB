@@ -1,7 +1,7 @@
 // Better Auth config: login, sessions and password hashing, stored in our Postgres.
 // Tables: db/migrations/0003_auth.sql. The HTTP endpoints live in app/api/auth/[...all].
 //
-// Naming: Better Auth calls the logged-in person a "user". In DecisionDB it's a "profile":
+// Naming: Better Auth calls the logged-in person a "user". In DecideDB it's a "profile":
 // table `profile`, foreign keys `profile_id`, and `profileId` in our code (see lib/session.ts).
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";

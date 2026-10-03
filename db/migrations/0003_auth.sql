@@ -1,4 +1,4 @@
--- DecisionDB auth: who can log into the dashboard.
+-- DecideDB auth: who can log into the dashboard.
 -- Owned by Better Auth (config: web/lib/auth.ts). Generated with
 --   bunx @better-auth/cli generate --config lib/auth.ts --output ../db/migrations/0003_auth.sql
 -- then formatted. If you change auth.ts (plugins, providers), regenerate instead of hand-editing.

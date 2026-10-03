@@ -25,14 +25,14 @@ web/                  Next.js (App Router) — the only server. See web/CLAUDE.m
   proxy.ts              quick cookie check, redirects /console to /login
   components/ hooks/ styles/ lib/
 sdk/
-  js/                 @decisiondb/sdk — TypeScript, wraps @typesafe-ai/sdk (its only dependency)
-  python/             decisiondb — wraps typesafe-sdk (its only dependency)
+  js/                 @decidedb/sdk — TypeScript, wraps @typesafe-ai/sdk (its only dependency)
+  python/             decidedb — wraps typesafe-sdk (its only dependency)
 db/migrations/        SQL, run in order (docker compose runs them on a fresh volume)
-docker-compose.yml    local Postgres on host port 5433 (override with DECISIONDB_PG_PORT in a root .env); data persists in the pgdata volume
+docker-compose.yml    local Postgres on host port 5433 (override with DECIDEDB_PG_PORT in a root .env); data persists in the pgdata volume
 notes/                planning notes
 ```
 - **Decided (2026-09-26): everything is Next.js + Bun.** One Next.js app serves the landing/docs, the dashboard, SDK ingest and the dashboard API. Rust/Axum and Hono are dropped. Don't reopen unless the developer asks.
-- Product is an SDK (JS + Python) that logs asynchronously to DecisionDB, NOT a proxy in front of Jev. The user's app calls Jev itself, then `decisiondb.log()` POSTs request + response to `<DECISIONDB_URL>/ingest/response`. The hosted URL is TODO; default is `http://localhost:3000`.
+- Product is an SDK (JS + Python) that logs asynchronously to DecideDB, NOT a proxy in front of Jev. The user's app calls Jev itself, then `decidedb.log()` POSTs request + response to `<DECIDEDB_URL>/ingest/response`. The hosted URL is TODO; default is `http://localhost:3000`.
 - **Decided:** Postgres must be PRIVATE (no public IP). Hosting = Cloud Run + private Cloud SQL (us-west1 Oregon, Direct VPC egress). Vercel is out. Next.js builds with `output: "standalone"` for the container. Region: us-west (Oregon), same as Jev.
 - **Decided (2026-09-27): dashboard login built early**, ahead of logging/UI/grading, at the developer's request. Better Auth + our Postgres; the logged-in identity is a **profile** (`profile` table, `profile_id` FKs, `profileId` in code). Email + password always on; GitHub/Google only when their env keys are set. Env: `web/.env.local` (template `web/.env.example`).
 - **Every data table has `profile_id`; every query must filter by the logged-in profile** (`requireProfile()` → `profileId`). Never return rows without that filter.

@@ -2,8 +2,8 @@ import type { CSSProperties } from "react";
 import { Logo } from "./Logo";
 import { LoopPlayer, type Segment, type Step } from "./LoopPlayer";
 
-// Animated "how it works" diagram: your app <-> decisiondb sdk <-> Jev API, with the SDK
-// copying the request up to DecisionDB and the response down to DecisionDB in the background.
+// Animated "how it works" diagram: your app <-> decidedb sdk <-> Jev API, with the SDK
+// copying the request up to DecideDB and the response down to DecideDB in the background.
 //
 // Four looks, all sharing one 4.8s animation loop (timings in TIMING below) (see "Flow diagram" in app.css):
 //   SdkFlow        A: SDK as its own box
@@ -51,9 +51,9 @@ function Bursts({ ret }: { ret: string }) {
 }
 
 // When things fire in the 4.8s loop.
-//   send: request leaves for Jev + copy of request leaves for DecisionDB
+//   send: request leaves for Jev + copy of request leaves for DecideDB
 //   back: Jev's response leaves Jev
-//   ret:  response reaches your code + copy of response leaves for DecisionDB
+//   ret:  response reaches your code + copy of response leaves for DecideDB
 // A/B spend 0.8s on the your code -> SDK line first. C/D have no line: "call!" and both
 // sends happen at the same moment.
 const TIMING = {
@@ -61,12 +61,12 @@ const TIMING = {
   touch: { send: "0s", back: "1.2s", ret: "2s" },
 };
 
-export function DecisionDBNode({ side }: { side: "in" | "out" }) {
+export function DecideDBNode({ side }: { side: "in" | "out" }) {
   return (
     <div className={`flow__node flow__node--${side}`}>
       <span className="flow__brand">
         <Logo size={14} />
-        DecisionDB
+        DecideDB
       </span>
       <small>{side === "in" ? "request" : "response"}</small>
     </div>
@@ -75,11 +75,11 @@ export function DecisionDBNode({ side }: { side: "in" | "out" }) {
 
 // Step guide for the basic diagrams (C and C2), in seconds on C's 4.8s loop.
 const BASIC_STEPS: Step[] = [
-  { t: 0, text: "Your code calls Jev through the SDK. A copy of the request goes to DecisionDB in the background." },
-  { t: 0.8, text: "Jev gets the request. The copy is saved in DecisionDB without slowing your call." },
+  { t: 0, text: "Your code calls Jev through the SDK. A copy of the request goes to DecideDB in the background." },
+  { t: 0.8, text: "Jev gets the request. The copy is saved in DecideDB without slowing your call." },
   { t: 1.2, text: "Jev answers. The response heads back to the SDK." },
-  { t: 2.0, text: "Your code gets the answer. A copy of the response goes to DecisionDB." },
-  { t: 2.8, text: "Saved: DecisionDB now has the full request and response, ready to browse and grade." },
+  { t: 2.0, text: "Your code gets the answer. A copy of the response goes to DecideDB." },
+  { t: 2.8, text: "Saved: DecideDB now has the full request and response, ready to browse and grade." },
 ];
 
 const BASIC_SEGMENTS: Segment[] = [
@@ -93,7 +93,7 @@ const scaleSegments = (k: number, end = 4.8) =>
   BASIC_SEGMENTS.map((s) => ({ ...s, from: s.from * k, to: Math.min(s.to, end) * k }));
 
 const LABEL =
-  "Your app calls the Jev API through the DecisionDB SDK. On the way out, the SDK sends a copy of the request to DecisionDB; on the way back, it sends a copy of the response. Both copies are sent in the background without blocking your app.";
+  "Your app calls the Jev API through the DecideDB SDK. On the way out, the SDK sends a copy of the request to DecideDB; on the way back, it sends a copy of the response. Both copies are sent in the background without blocking your app.";
 
 function Flow({ variant }: { variant: Variant }) {
   const framed = variant === "nested" || variant === "joined";
@@ -109,7 +109,7 @@ function Flow({ variant }: { variant: Variant }) {
           </div>
         )}
 
-        <DecisionDBNode side="in" />
+        <DecideDBNode side="in" />
         <div className="flow__link flow__link--copy flow__link--up">
           <div className="flow__line">
             <span className="flow__label">copy of request</span>
@@ -121,7 +121,7 @@ function Flow({ variant }: { variant: Variant }) {
           <div className="flow__app">
             <span className="flow__frame-label">your app</span>
             <div className="flow__shell">
-              <span className="flow__shell-label">decisiondb sdk</span>
+              <span className="flow__shell-label">decidedb sdk</span>
               <div className="flow__code">
                 your code
                 <Bursts ret={t.ret} />
@@ -143,7 +143,7 @@ function Flow({ variant }: { variant: Variant }) {
               </div>
             )}
             <div className="flow__node flow__node--sdk">
-              decisiondb sdk
+              decidedb sdk
               {variant === "split" && <small>in your app</small>}
               {variant === "joined" && <Bursts ret={t.ret} />}
             </div>
@@ -174,7 +174,7 @@ function Flow({ variant }: { variant: Variant }) {
             <Pulse dir="copy-out" delay={t.ret} />
           </div>
         </div>
-        <DecisionDBNode side="out" />
+        <DecideDBNode side="out" />
       </div>
 
     </>
@@ -189,7 +189,7 @@ function Flow({ variant }: { variant: Variant }) {
   );
 }
 
-// C with a single DecisionDB under the SDK: both copies (request, then response) drop into it.
+// C with a single DecideDB under the SDK: both copies (request, then response) drop into it.
 // This is the basic diagram on the landing page.
 // ONE_DB_SLOW stretches C's timing for this version only; CSS reads the loop length from --loop.
 // The loop is 3.4 base seconds (not C's 4.8), so there's only a short rest after the response copy lands.
@@ -207,7 +207,7 @@ export function SdkFlowOneDb() {
 
         <div className="flow__node flow__node--app">your code</div>
         <div className="flow__node flow__node--sdk">
-          decisiondb sdk
+          decidedb sdk
           <Bursts ret={t.ret} />
         </div>
 
@@ -228,7 +228,7 @@ export function SdkFlowOneDb() {
           </span>
         </div>
 
-        {/* Both copies go down into the one DecisionDB: request copy (left), response copy (right). */}
+        {/* Both copies go down into the one DecideDB: request copy (left), response copy (right). */}
         <div className="flow__link flow__link--db">
           <div className="flow__line flow__line--async">
             <span className="flow__label flow__label--left">copy of request</span>
@@ -242,7 +242,7 @@ export function SdkFlowOneDb() {
         <div className="flow__node flow__node--db">
           <span className="flow__brand">
             <Logo size={14} />
-            DecisionDB
+            DecideDB
           </span>
           <small>requests · responses</small>
           {/* Flashes when each copy lands (0.8s and 2.8s into C's loop, slowed). */}

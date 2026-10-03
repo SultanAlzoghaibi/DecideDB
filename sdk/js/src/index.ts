@@ -1,9 +1,9 @@
-// DecisionDB JS SDK: TypeSafe's Jev client, plus a copy of every call sent to DecisionDB.
+// DecideDB JS SDK: TypeSafe's Jev client, plus a copy of every call sent to DecideDB.
 //
-//   const decisiondb = new DecisionDB({ groupId: "support-bot", tags: ["prod"] });
-//   const res = await decisiondb.systemOne({ state, questions }, { userId: "user_482" });
-//   decisiondb.idOf(res);        // decision id, keep it to grade later
-//   await decisiondb.flush();    // before a script / serverless function exits
+//   const decidedb = new DecideDB({ groupId: "support-bot", tags: ["prod"] });
+//   const res = await decidedb.systemOne({ state, questions }, { userId: "user_482" });
+//   decidedb.idOf(res);        // decision id, keep it to grade later
+//   await decidedb.flush();    // before a script / serverless function exits
 //
 // `systemOne` takes exactly TypeSafe's request, plus optional per-call metadata. It calls Jev,
 // queues the log in the background, and returns Jev's response unchanged. If Jev fails, the
@@ -12,15 +12,15 @@
 import { TypeSafeClient } from "@typesafe-ai/sdk";
 import type { Questions, RequestOptions, SystemOneRequest } from "@typesafe-ai/sdk";
 
-const SDK_VERSION = "decisiondb-js/0.2.0";
+const SDK_VERSION = "decidedb-js/0.2.0";
 
-// TODO(later): replace with the hosted DecisionDB URL once it exists.
+// TODO(later): replace with the hosted DecideDB URL once it exists.
 const DEFAULT_BASE_URL = "http://localhost:3000";
 
-export type DecisionDBOptions = {
-  apiKey?: string; // DecisionDB key. Default: DECISIONDB_API_KEY. Only ever sent to DecisionDB.
+export type DecideDBOptions = {
+  apiKey?: string; // DecideDB key. Default: DECIDEDB_API_KEY. Only ever sent to DecideDB.
   jevApiKey?: string; // Jev (TypeSafe) key. Default: TYPESAFE_API_KEY. Only ever sent to Jev.
-  baseUrl?: string; // Where DecisionDB runs. Default: DECISIONDB_URL, else http://localhost:3000.
+  baseUrl?: string; // Where DecideDB runs. Default: DECIDEDB_URL, else http://localhost:3000.
   userId?: string; // Attached to every call (override per call).
   groupId?: string;
   tags?: string[];
@@ -29,7 +29,7 @@ export type DecisionDBOptions = {
   onError?: (err: unknown) => void; // A log failed to send. Default: console.warn.
 };
 
-// Per-call DecisionDB metadata, plus TypeSafe's own request options (timeout, retry, signal, headers).
+// Per-call DecideDB metadata, plus TypeSafe's own request options (timeout, retry, signal, headers).
 export type CallOptions = RequestOptions & {
   userId?: string | null;
   groupId?: string | null;
@@ -37,8 +37,8 @@ export type CallOptions = RequestOptions & {
   decisionId?: string; // Your own id (e.g. a ticket id) instead of a generated one.
 };
 
-// The record sent to DecisionDB for one Jev call (same shape as the Python SDK).
-export type DecisionDBRecord = {
+// The record sent to DecideDB for one Jev call (same shape as the Python SDK).
+export type DecideDBRecord = {
   id: string;
   started_at: string;
   latency_ms: number;
@@ -55,7 +55,7 @@ export type DecisionDBRecord = {
 const env = (name: string): string | undefined =>
   typeof process !== "undefined" ? process.env[name] || undefined : undefined;
 
-export class DecisionDB {
+export class DecideDB {
   private readonly jev: TypeSafeClient;
   private readonly apiKey?: string;
   private readonly url: string;
@@ -66,17 +66,17 @@ export class DecisionDB {
   // response object → decision id. Weak, so old responses can still be garbage collected.
   private readonly ids = new WeakMap<object, string>();
 
-  constructor(options: DecisionDBOptions = {}) {
+  constructor(options: DecideDBOptions = {}) {
     this.jev =
       options.jevClient ??
       new TypeSafeClient({
         ...(options.jevApiKey ? { apiKey: options.jevApiKey } : {}),
         ...(options.model ? { defaultModel: options.model } : {}),
       });
-    this.apiKey = options.apiKey ?? env("DECISIONDB_API_KEY");
-    const baseUrl = options.baseUrl ?? env("DECISIONDB_URL") ?? DEFAULT_BASE_URL;
+    this.apiKey = options.apiKey ?? env("DECIDEDB_API_KEY");
+    const baseUrl = options.baseUrl ?? env("DECIDEDB_URL") ?? DEFAULT_BASE_URL;
     this.url = `${baseUrl.replace(/\/+$/, "")}/ingest/response`;
-    this.onError = options.onError ?? ((err) => console.warn("[decisiondb] failed to log:", err));
+    this.onError = options.onError ?? ((err) => console.warn("[decidedb] failed to log:", err));
     this.defaults = {
       userId: options.userId ?? null,
       groupId: options.groupId ?? null,
@@ -84,7 +84,7 @@ export class DecisionDB {
     };
   }
 
-  /** Same as TypeSafe's `systemOne`, plus per-call DecisionDB metadata. */
+  /** Same as TypeSafe's `systemOne`, plus per-call DecideDB metadata. */
   async systemOne<const Q extends Questions>(request: SystemOneRequest<Q>, options: CallOptions = {}) {
     const { userId, groupId, tags, decisionId, ...typesafeOptions } = options;
     const meta = {
@@ -115,13 +115,13 @@ export class DecisionDB {
     }
   }
 
-  /** The DecisionDB decision id for a response returned by `systemOne` (for grading later). */
+  /** The DecideDB decision id for a response returned by `systemOne` (for grading later). */
   idOf(response: unknown): string | undefined {
     return typeof response === "object" && response !== null ? this.ids.get(response) : undefined;
   }
 
   /** Low-level: queue an already-built record. Most people never need this. */
-  log(record: DecisionDBRecord): void {
+  log(record: DecideDBRecord): void {
     this.queue(record);
   }
 
@@ -131,12 +131,12 @@ export class DecisionDB {
   }
 
   // Fire-and-forget: the POST happens in the background and never throws.
-  private queue(record: DecisionDBRecord): void {
+  private queue(record: DecideDBRecord): void {
     const send = this.send(record).finally(() => this.pending.delete(send));
     this.pending.add(send);
   }
 
-  private async send(record: DecisionDBRecord): Promise<void> {
+  private async send(record: DecideDBRecord): Promise<void> {
     try {
       const res = await fetch(this.url, {
         method: "POST",
@@ -146,7 +146,7 @@ export class DecisionDB {
         },
         body: JSON.stringify(record),
       });
-      if (!res.ok) throw new Error(`DecisionDB responded ${res.status}`);
+      if (!res.ok) throw new Error(`DecideDB responded ${res.status}`);
     } catch (err) {
       this.onError(err);
     }

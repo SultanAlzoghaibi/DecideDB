@@ -7,10 +7,10 @@ import { ResetLoop } from "./ResetLoop";
 //
 // One loop = two calls (times below on the 9.6s scale, stretched by SLOW) (see "RAG diagram" in app.css):
 //   call 1, cache HIT  (most calls): examples added from memory, no extra network trip
-//     0.0 call! + "hit" · 0.6 request (+examples) to Jev, copy to DecisionDB · 1.8 response back
-//     2.6 response! + copy of response to DecisionDB
-//   grading: 3.6 your grading code sends a score to DecisionDB
-//   call 2, cache MISS: SDK fetches examples from DecisionDB first, then calls Jev as usual
+//     0.0 call! + "hit" · 0.6 request (+examples) to Jev, copy to DecideDB · 1.8 response back
+//     2.6 response! + copy of response to DecideDB
+//   grading: 3.6 your grading code sends a score to DecideDB
+//   call 2, cache MISS: SDK fetches examples from DecideDB first, then calls Jev as usual
 //     4.8 call! + "miss" + fetch down · 5.6 examples back · 6.4 "saved", request to Jev + copy
 //     7.6 response back · 8.4 response! + copy of response
 
@@ -49,7 +49,7 @@ function CylinderIcon() {
 }
 
 const LABEL =
-  "Advanced, experimental: your app calls Jev through the DecisionDB SDK, which keeps a cache of well-graded past examples. On a cache hit the examples are added to the request instantly. On a miss the SDK first fetches examples from DecisionDB, then calls Jev. Copies of each request and response go to DecisionDB in the background, and your grading code sends scores to DecisionDB.";
+  "Advanced, experimental: your app calls Jev through the DecideDB SDK, which keeps a cache of well-graded past examples. On a cache hit the examples are added to the request instantly. On a miss the SDK first fetches examples from DecideDB, then calls Jev. Copies of each request and response go to DecideDB in the background, and your grading code sends scores to DecideDB.";
 
 export function SdkFlowRag() {
   return (
@@ -66,7 +66,7 @@ export function SdkFlowRag() {
         {/* Top lane: the Jev call. */}
         <div className="flow__node flow__node--app">your code</div>
         <div className="flow__node flow__node--sdk">
-          decisiondb sdk
+          decidedb sdk
           <Burst text="call!" delay={at(0)} />
           <Burst text="response!" delay={at(2.6)} />
           <Burst text="call!" delay={at(4.8)} />
@@ -98,7 +98,7 @@ export function SdkFlowRag() {
           <Hits delays={[at(1.4), at(7.2)]} />
         </div>
 
-        {/* SDK <-> DecisionDB: background copies (left) and the cache-miss fetch (right). */}
+        {/* SDK <-> DecideDB: background copies (left) and the cache-miss fetch (right). */}
         <div className="flow__link flow__link--db">
           <div className="flow__line flow__line--async">
             <span className="flow__label flow__label--left">copies</span>
@@ -111,7 +111,7 @@ export function SdkFlowRag() {
           </div>
         </div>
 
-        {/* Bottom lane: grading feeds scores into DecisionDB. */}
+        {/* Bottom lane: grading feeds scores into DecideDB. */}
         <div className="flow__pair flow__pair--grader">
           <div className="flow__node">your code</div>
           <div className="flow__node flow__node--sdk-sm">sdk</div>
@@ -125,7 +125,7 @@ export function SdkFlowRag() {
         <div className="flow__node flow__node--db">
           <span className="flow__brand">
             <Logo size={14} />
-            DecisionDB
+            DecideDB
           </span>
           <small>grades · examples</small>
           <Hits delays={[at(1.4), at(3.4), at(4.4), at(5.6), at(7.2), at(9.2)]} />
@@ -134,7 +134,7 @@ export function SdkFlowRag() {
 
       <p className="flow__caption">
         Most calls hit the cache, so examples are added with no extra network trip. On a miss the SDK fetches them from
-        DecisionDB first.
+        DecideDB first.
       </p>
     </ResetLoop>
   );

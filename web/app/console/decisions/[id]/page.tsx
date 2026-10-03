@@ -10,7 +10,7 @@ import { getDecision } from "@/lib/decisions";
 import "@/styles/auth.css";
 import "@/styles/decisions.css";
 
-export const metadata: Metadata = { title: "Decision · DecisionDB" };
+export const metadata: Metadata = { title: "Decision · DecideDB" };
 
 const pretty = (v: unknown) => (typeof v === "string" ? v : JSON.stringify(v, null, 2));
 
@@ -102,10 +102,10 @@ export default async function DecisionPage({
         {d.context && (
           <section className="console__card dx-ctxcard">
             <h2>
-              <ContextSun /> Context added by DecisionDB
+              <ContextSun /> Context added by DecideDB
             </h2>
             <p className="dx-help">
-              Retrieval was on for this call, so DecisionDB added past graded examples before it went to Jev. This is exactly
+              Retrieval was on for this call, so DecideDB added past graded examples before it went to Jev. This is exactly
               what was added.
             </p>
             <dl className="dx-facts dx-facts--small">

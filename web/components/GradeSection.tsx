@@ -1,7 +1,7 @@
 import { CodeBlock } from "./CodeBlock";
 
 const GRADE_EXAMPLE = `
-# Every proxied response carries an x-decisiondb-request-id header.
+# Every proxied response carries an x-decidedb-request-id header.
 # Once you know the outcome, grade that request:
 curl -X POST http://localhost:8080/v1/requests/req_8f2a1c/grade \\
   -H "Content-Type: application/json" \\

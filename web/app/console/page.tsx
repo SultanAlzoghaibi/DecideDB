@@ -6,7 +6,7 @@ import { requireProfile } from "@/lib/session";
 import "@/styles/auth.css";
 import "@/styles/decisions.css";
 
-export const metadata: Metadata = { title: "Console · DecisionDB" };
+export const metadata: Metadata = { title: "Console · DecideDB" };
 
 // Stub: the logged-in home. Usage (calls logged, tokens, grades) will show here
 // once logging writes to Postgres and has a profile to belong to.

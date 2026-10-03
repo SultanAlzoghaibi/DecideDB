@@ -6,12 +6,12 @@ import { LoopPlayer, type Segment, type Step } from "./LoopPlayer";
 // Two more looks for the RAG diagram where the cache is its own box inside your app
 // (from the hand sketch), instead of a chip on the SDK:
 //   SdkFlowRagSide   cache sits down-right of the SDK: lookup arrow in, return arrow back,
-//                    and on a miss the cache fetches from DecisionDB through its own line
-//   SdkFlowRagStack  cache sits right under the SDK, on the line to DecisionDB: a lookup dips
-//                    into the cache; a miss continues through it down to DecisionDB
+//                    and on a miss the cache fetches from DecideDB through its own line
+//   SdkFlowRagStack  cache sits right under the SDK, on the line to DecideDB: a lookup dips
+//                    into the cache; a miss continues through it down to DecideDB
 //
 // Dots: a plain pink dot is a normal request/response. A pink dot with a spinning sun ring is
-// RAG-augmented: examples coming back from the cache or DecisionDB, the augmented request, and the
+// RAG-augmented: examples coming back from the cache or DecideDB, the augmented request, and the
 // response Jev returned for it (plus the copies of both). The legend explains the two.
 //
 // Timeline (base seconds, stretched by SLOW from SdkFlowRag.tsx; CSS loop = 10.4s × SLOW).
@@ -19,8 +19,8 @@ import { LoopPlayer, type Segment, type Step } from "./LoopPlayer";
 // in memory, so it should look almost instant next to the network.
 //   call 1 · HIT   0 call! + lookup · 0.3 "hit", back to SDK · 0.6 request + copy
 //                  1.8 response back · 2.6 response! + copy
-//   grading        3.6 score → DecisionDB
-//   call 2 · MISS  4.8 call! + lookup · 5.1 "miss", fetch → DecisionDB · 5.9 examples → cache
+//   grading        3.6 score → DecideDB
+//   call 2 · MISS  4.8 call! + lookup · 5.1 "miss", fetch → DecideDB · 5.9 examples → cache
 //                  6.7 "saved", back to SDK · 7.0 request + copy · 8.2 response back
 //                  9.0 response! + copy
 const at = (t: number) => `${+(t * SLOW).toFixed(2)}s`;
@@ -30,15 +30,15 @@ const at = (t: number) => `${+(t * SLOW).toFixed(2)}s`;
 const STEPS: Step[] = [
   { t: 0, text: "Your code calls Jev through the SDK. The SDK checks its cache first." },
   { t: 0.3, text: "Hit: examples for this question are already in memory. No network wait." },
-  { t: 0.6, text: "Request + examples go to Jev. A copy goes to DecisionDB in the background." },
+  { t: 0.6, text: "Request + examples go to Jev. A copy goes to DecideDB in the background." },
   { t: 1.8, text: "Jev answers, guided by the examples." },
-  { t: 2.6, text: "Your code gets the answer. A copy is saved to DecisionDB." },
+  { t: 2.6, text: "Your code gets the answer. A copy is saved to DecideDB." },
   { t: 3.6, text: "Once the real outcome is known, your grading code scores the decision." },
   { t: 4.8, text: "A new question. The SDK checks the cache again." },
-  { t: 5.1, text: "Miss: nothing cached for this question yet. The SDK asks DecisionDB and waits." },
-  { t: 5.9, text: "DecisionDB returns its best-graded examples. The cache keeps them." },
+  { t: 5.1, text: "Miss: nothing cached for this question yet. The SDK asks DecideDB and waits." },
+  { t: 5.9, text: "DecideDB returns its best-graded examples. The cache keeps them." },
   { t: 6.7, text: "The examples are handed to the SDK." },
-  { t: 7.0, text: "Request + examples go to Jev, with a copy to DecisionDB." },
+  { t: 7.0, text: "Request + examples go to Jev, with a copy to DecideDB." },
   { t: 8.2, text: "Jev answers, guided by the examples." },
   { t: 9.0, text: "Your code gets the answer. Next time, this question is a cache hit." },
 ].map((s) => ({ ...s, t: s.t * SLOW }));
@@ -121,7 +121,7 @@ function CacheStatuses() {
 }
 
 const LABEL =
-  "Advanced, experimental: your code calls Jev through the DecisionDB SDK. The SDK first looks in its cache of well-graded past examples. On a hit the examples come straight back; on a miss the cache fetches them from DecisionDB first. Then the request with examples goes to Jev and the response returns as usual. Copies of each request and response go to DecisionDB in the background, and your grading code sends scores to DecisionDB.";
+  "Advanced, experimental: your code calls Jev through the DecideDB SDK. The SDK first looks in its cache of well-graded past examples. On a hit the examples come straight back; on a miss the cache fetches them from DecideDB first. Then the request with examples goes to Jev and the response returns as usual. Copies of each request and response go to DecideDB in the background, and your grading code sends scores to DecideDB.";
 
 function RagCacheFlow({ layout }: { layout: "side" | "stack" }) {
   return (
@@ -142,7 +142,7 @@ function RagCacheFlow({ layout }: { layout: "side" | "stack" }) {
 
           <div className="flow__node flow__node--app">your code</div>
           <div className="flow__node flow__node--sdk">
-            decisiondb sdk
+            decidedb sdk
             <Burst text="call!" delay={at(0)} />
             <Burst text="response!" delay={at(2.6)} />
             <Burst text="call!" delay={at(4.8)} />
@@ -168,7 +168,7 @@ function RagCacheFlow({ layout }: { layout: "side" | "stack" }) {
                   <Dot move="flu" t={0.3} ctx />
                   <Dot move="flu" t={6.7} ctx />
                 </div>
-                {/* cache ⇄ DecisionDB, only on a miss */}
+                {/* cache ⇄ DecideDB, only on a miss */}
                 <div className="flow__elbow flow__elbow--fetch">
                   <span className="flow__elbow-label flow__elbow-label--fetch">on a miss: fetch</span>
                   <Dot move="dl" t={5.1} />
@@ -184,7 +184,7 @@ function RagCacheFlow({ layout }: { layout: "side" | "stack" }) {
                   <Dot move="fdown" t={4.8} />
                   <Dot move="fup" t={6.7} ctx />
                 </div>
-                {/* cache ⇄ DecisionDB, only on a miss */}
+                {/* cache ⇄ DecideDB, only on a miss */}
                 <div className="flow__seg flow__seg--fetch">
                   <span className="flow__elbow-label flow__elbow-label--seg">on a miss: fetch</span>
                   <Dot move="down" t={5.1} />
@@ -214,7 +214,7 @@ function RagCacheFlow({ layout }: { layout: "side" | "stack" }) {
             <Hits delays={[at(1.4), at(7.8)]} />
           </div>
 
-          {/* SDK → DecisionDB copies: request copy (left) and response copy (right). */}
+          {/* SDK → DecideDB copies: request copy (left) and response copy (right). */}
           <div className="flow__link flow__link--db">
             <div className="flow__line flow__line--async">
               <span className="flow__label flow__label--left">copies</span>
@@ -240,7 +240,7 @@ function RagCacheFlow({ layout }: { layout: "side" | "stack" }) {
           <div className="flow__node flow__node--db">
             <span className="flow__brand">
               <Logo size={14} />
-              DecisionDB
+              DecideDB
             </span>
             <small>grades · examples</small>
             <Hits delays={[at(1.4), at(3.4), at(4.4), at(5.9), at(7.8), at(9.8)]} />

@@ -31,7 +31,7 @@ export function AnswerCell({ row }: { row: DecisionRow }) {
 }
 
 // The "context was added" mark: the same sun as the landing page's RAG diagram.
-export function ContextSun({ label = "Context added by DecisionDB" }: { label?: string }) {
+export function ContextSun({ label = "Context added by DecideDB" }: { label?: string }) {
   return (
     <svg className="dx-sun" viewBox="-10 -10 20 20" width="16" height="16" role="img" aria-label={label}>
       <title>{label}</title>

@@ -3,8 +3,8 @@ import { SdkLangDocs } from "@/components/sdkdocs/SdkLangDocs";
 import "@/styles/docs.css";
 
 export const metadata: Metadata = {
-  title: "DecisionDB Docs · Python SDK",
-  description: "Install, configure and use the DecisionDB Python SDK.",
+  title: "DecideDB Docs · Python SDK",
+  description: "Install, configure and use the DecideDB Python SDK.",
 };
 
 export default function Page() {

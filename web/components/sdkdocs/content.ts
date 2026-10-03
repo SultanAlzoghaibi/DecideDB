@@ -8,7 +8,7 @@ export type Variant = "async" | "sync" | "ts" | "js";
 // Identifier names used inside the shared wording, per language.
 export const NAMES = {
   python: {
-    client: "AsyncDecisionDB",
+    client: "AsyncDecideDB",
     call: "system_one",
     idOf: "id_of",
     flush: "flush()",
@@ -16,11 +16,11 @@ export const NAMES = {
     userId: "user_id",
     decisionId: "decision_id",
     onError: "on_error",
-    clientFile: "app/decisiondb_client.py",
-    pkg: "decisiondb",
+    clientFile: "app/decidedb_client.py",
+    pkg: "decidedb",
   },
   js: {
-    client: "DecisionDB",
+    client: "DecideDB",
     call: "systemOne",
     idOf: "idOf",
     flush: "await flush()",
@@ -28,8 +28,8 @@ export const NAMES = {
     userId: "userId",
     decisionId: "decisionId",
     onError: "onError",
-    clientFile: "src/lib/decisiondb.ts",
-    pkg: "@decisiondb/sdk",
+    clientFile: "src/lib/decidedb.ts",
+    pkg: "@decidedb/sdk",
   },
 } as const;
 
@@ -70,21 +70,21 @@ const isSync = (v: Variant) => v === "sync";
 const aw = (v: Variant) => (isSync(v) ? "" : "await ");
 
 const PY: Record<string, CodeFor> = {
-  install: () => ({ file: "terminal", code: `uv add decisiondb        # or: pip install decisiondb` }),
+  install: () => ({ file: "terminal", code: `uv add decidedb        # or: pip install decidedb` }),
   env: () => ({
     file: ".env",
     code: `TYPESAFE_API_KEY=sk-…          # Jev, from console.typesafe.ai
-DECISIONDB_API_KEY=jdb_live_…       # DecisionDB, from your DecisionDB console
-DECISIONDB_URL=https://<decisiondb-cloud-url>   # self-hosting: http://localhost:3000`,
+DECIDEDB_API_KEY=jdb_live_…       # DecideDB, from your DecideDB console
+DECIDEDB_URL=https://<decidedb-cloud-url>   # self-hosting: http://localhost:3000`,
   }),
   quickstart: (v) => ({
     file: "main.py",
     code: isSync(v)
       ? `from typesafe_sdk import Choice, Noul, Score
-from decisiondb import DecisionDB
+from decidedb import DecideDB
 
-with DecisionDB(group_id="support-bot") as decisiondb:
-    response = decisiondb.system_one(
+with DecideDB(group_id="support-bot") as decidedb:
+    response = decidedb.system_one(
         state={"document": "${STATE}"},
         questions=${indent(PY_Q, 8)},
     )
@@ -95,12 +95,12 @@ print(response.scores["urgency"].score)`
       : `import asyncio
 
 from typesafe_sdk import Choice, Noul, Score
-from decisiondb import AsyncDecisionDB
+from decidedb import AsyncDecideDB
 
 
 async def main() -> None:
-    async with AsyncDecisionDB(group_id="support-bot") as decisiondb:
-        response = await decisiondb.system_one(
+    async with AsyncDecideDB(group_id="support-bot") as decidedb:
+        response = await decidedb.system_one(
             state={"document": "${STATE}"},
             questions=${indent(PY_Q, 12)},
         )
@@ -113,20 +113,20 @@ async def main() -> None:
 asyncio.run(main())`,
   }),
   "client-file": (v) => ({
-    file: "app/decisiondb_client.py",
-    code: `from decisiondb import ${isSync(v) ? "DecisionDB" : "AsyncDecisionDB"}
+    file: "app/decidedb_client.py",
+    code: `from decidedb import ${isSync(v) ? "DecideDB" : "AsyncDecideDB"}
 
 # One client for the whole app. Keys and URL come from .env.
-decisiondb = ${isSync(v) ? "DecisionDB" : "AsyncDecisionDB"}(group_id="support-bot", tags=["prod"])`,
+decidedb = ${isSync(v) ? "DecideDB" : "AsyncDecideDB"}(group_id="support-bot", tags=["prod"])`,
   }),
   "per-call": (v) => ({
     file: "app/tickets.py",
-    code: `from app.decisiondb_client import decisiondb
+    code: `from app.decidedb_client import decidedb
 from app.questions import QUESTIONS
 
 
 ${isSync(v) ? "def" : "async def"} triage(ticket, current_user):
-    return ${aw(v)}decisiondb.system_one(
+    return ${aw(v)}decidedb.system_one(
         state={"document": ticket.text},
         questions=QUESTIONS,
         user_id=current_user.id,        # changes every call
@@ -135,23 +135,23 @@ ${isSync(v) ? "def" : "async def"} triage(ticket, current_user):
   }),
   ids: (v) => ({
     file: "app/tickets.py",
-    code: `response = ${aw(v)}decisiondb.system_one(state=..., questions=QUESTIONS)
-decision_id = decisiondb.id_of(response)     # a UUID made by the SDK
+    code: `response = ${aw(v)}decidedb.system_one(state=..., questions=QUESTIONS)
+decision_id = decidedb.id_of(response)     # a UUID made by the SDK
 
 # Or use your own id, so grading later is just a lookup:
-${aw(v)}decisiondb.system_one(state=..., questions=QUESTIONS, decision_id=ticket.id)`,
+${aw(v)}decidedb.system_one(state=..., questions=QUESTIONS, decision_id=ticket.id)`,
   }),
   errors: (v) => ({
     file: "app/tickets.py",
     code: `from typesafe_sdk import TypeSafeAPIError
 
 try:
-    response = ${aw(v)}decisiondb.system_one(state=..., questions=QUESTIONS)
-except TypeSafeAPIError as err:   # logged to DecisionDB, then re-raised
+    response = ${aw(v)}decidedb.system_one(state=..., questions=QUESTIONS)
+except TypeSafeAPIError as err:   # logged to DecideDB, then re-raised
     print(err.status, err.body)
 
 # On shutdown (the with-block does this for you):
-${isSync(v) ? "decisiondb.close()" : "await decisiondb.aclose()"}`,
+${isSync(v) ? "decidedb.close()" : "await decidedb.aclose()"}`,
   }),
 };
 
@@ -167,15 +167,15 @@ const ext = (v: Variant) => (v === "js" ? "js" : "ts");
 const isTs = (v: Variant) => v === "ts";
 
 const JS: Record<string, CodeFor> = {
-  install: () => ({ file: "terminal", code: `bun add @decisiondb/sdk   # or: npm install @decisiondb/sdk` }),
+  install: () => ({ file: "terminal", code: `bun add @decidedb/sdk   # or: npm install @decidedb/sdk` }),
   env: PY.env!,
   quickstart: (v) => ({
     file: `main.${ext(v)}`,
-    code: `import { DecisionDB, choice, noul, score } from "@decisiondb/sdk";
+    code: `import { DecideDB, choice, noul, score } from "@decidedb/sdk";
 
-const decisiondb = new DecisionDB({ groupId: "support-bot" });
+const decidedb = new DecideDB({ groupId: "support-bot" });
 
-const response = await decisiondb.systemOne({
+const response = await decidedb.systemOne({
   state: { document: "${STATE}" },
   questions: ${indent(JS_Q, 2)},
 });
@@ -184,22 +184,22 @@ console.log(response.answers.billing.noul);
 console.log(response.answers.tone.choice);
 console.log(response.answers.urgency.score);
 
-await decisiondb.flush();`,
+await decidedb.flush();`,
   }),
   "client-file": (v) => ({
-    file: `src/lib/decisiondb.${ext(v)}`,
-    code: `import { DecisionDB } from "@decisiondb/sdk";
+    file: `src/lib/decidedb.${ext(v)}`,
+    code: `import { DecideDB } from "@decidedb/sdk";
 
 // One client for the whole app. Keys and URL come from .env.
-export const decisiondb = new DecisionDB({ groupId: "support-bot", tags: ["prod"] });`,
+export const decidedb = new DecideDB({ groupId: "support-bot", tags: ["prod"] });`,
   }),
   "per-call": (v) => ({
     file: `src/tickets.${ext(v)}`,
-    code: `import { decisiondb } from "./lib/decisiondb";
+    code: `import { decidedb } from "./lib/decidedb";
 import { QUESTIONS } from "./questions";
 ${isTs(v) ? `import type { Ticket, User } from "./types";\n` : ""}
 export async function triage(${isTs(v) ? "ticket: Ticket, currentUser: User" : "ticket, currentUser"}) {
-  return decisiondb.systemOne(
+  return decidedb.systemOne(
     { state: { document: ticket.text }, questions: QUESTIONS },
     {
       userId: currentUser.id,         // changes every call
@@ -210,24 +210,24 @@ export async function triage(${isTs(v) ? "ticket: Ticket, currentUser: User" : "
   }),
   ids: (v) => ({
     file: `src/tickets.${ext(v)}`,
-    code: `const response = await decisiondb.systemOne({ state, questions: QUESTIONS });
-const decisionId${isTs(v) ? ": string | undefined" : ""} = decisiondb.idOf(response);   // a UUID made by the SDK
+    code: `const response = await decidedb.systemOne({ state, questions: QUESTIONS });
+const decisionId${isTs(v) ? ": string | undefined" : ""} = decidedb.idOf(response);   // a UUID made by the SDK
 
 // Or use your own id, so grading later is just a lookup:
-await decisiondb.systemOne({ state, questions: QUESTIONS }, { decisionId: ticket.id });`,
+await decidedb.systemOne({ state, questions: QUESTIONS }, { decisionId: ticket.id });`,
   }),
   errors: (v) => ({
     file: `src/tickets.${ext(v)}`,
     code: `import { APIError } from "@typesafe-ai/sdk";
 
 try {
-  const response = await decisiondb.systemOne({ state, questions: QUESTIONS });
-} catch (err${isTs(v) ? ": unknown" : ""}) {   // logged to DecisionDB, then re-thrown
+  const response = await decidedb.systemOne({ state, questions: QUESTIONS });
+} catch (err${isTs(v) ? ": unknown" : ""}) {   // logged to DecideDB, then re-thrown
   if (err instanceof APIError) console.log(err.status, err.body);
 }
 
 // On shutdown (scripts, serverless, SIGTERM):
-await decisiondb.flush();`,
+await decidedb.flush();`,
   }),
 };
 

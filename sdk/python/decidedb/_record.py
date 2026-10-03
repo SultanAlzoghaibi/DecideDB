@@ -1,4 +1,4 @@
-"""Builds the JSON record the SDK sends to DecisionDB for one Jev call."""
+"""Builds the JSON record the SDK sends to DecideDB for one Jev call."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Mapping, Optional, Sequence
 
-SDK_VERSION = "decisiondb-python/0.2.0"
+SDK_VERSION = "decidedb-python/0.2.0"
 
 
 def new_id() -> str:

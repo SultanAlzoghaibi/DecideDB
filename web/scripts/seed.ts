@@ -14,10 +14,10 @@ import { saveDecision, type AddedContext, type DecisionRecord } from "@/lib/deci
 
 // Local test logins created by --demo. Dev only: never use these anywhere real.
 const DEMO_PROFILES = [
-  { name: "Demo A", email: "demo-a@decisiondb.test" },
-  { name: "Demo B", email: "demo-b@decisiondb.test" },
+  { name: "Demo A", email: "demo-a@decidedb.test" },
+  { name: "Demo B", email: "demo-b@decidedb.test" },
 ];
-const DEMO_PASSWORD = "decisiondb-demo-password";
+const DEMO_PASSWORD = "decidedb-demo-password";
 
 // ── args ─────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
@@ -134,7 +134,7 @@ function answerFor(q: Q, r: () => number) {
 const round = (n: number) => Math.round(n * 100) / 100;
 const pick = <T,>(xs: T[], r: () => number) => xs[Math.floor(r() * xs.length)]!;
 
-// ── build one full SDK record (and sometimes the context DecisionDB added) ──
+// ── build one full SDK record (and sometimes the context DecideDB added) ──
 function makeDecision(r: () => number, i: number, profileTag: string): { record: DecisionRecord; context?: AddedContext } {
   const group = pick(Object.keys(GROUPS), r);
   const g = GROUPS[group]!;
@@ -152,7 +152,7 @@ function makeDecision(r: () => number, i: number, profileTag: string): { record:
     tags: r() < 0.8 ? ["prod"] : r() < 0.5 ? ["staging"] : ["prod", "beta"],
     request: { model: r() < 0.6 ? "jev-1.13.0" : "jev-latest", state, questions },
     response: null,
-    sdk: r() < 0.7 ? "decisiondb-python/0.2.0" : "decisiondb-js/0.2.0",
+    sdk: r() < 0.7 ? "decidedb-python/0.2.0" : "decidedb-js/0.2.0",
   };
 
   // A few failed calls: Jev rate-limited us or rejected the request.
@@ -171,7 +171,7 @@ function makeDecision(r: () => number, i: number, profileTag: string): { record:
     usage: { input_tokens: 90 + Math.floor(r() * 400), output_tokens: 6 * Object.keys(questions).length },
   };
 
-  // About 1 in 4 calls had retrieval on: DecisionDB added past graded examples to a choice question.
+  // About 1 in 4 calls had retrieval on: DecideDB added past graded examples to a choice question.
   if (r() < 0.25) {
     const [key, q] = Object.entries(questions).find(([, q]) => q.type === "choice")!;
     const options = Object.keys((q as { criteria: Record<string, unknown> }).criteria);

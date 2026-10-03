@@ -11,7 +11,7 @@ import { pool } from "@/lib/db";
 // Types
 // ─────────────────────────────────────────────────────────────────────
 
-// One Jev call as the SDKs send it (sdk/python/README.md → "What gets sent to DecisionDB").
+// One Jev call as the SDKs send it (sdk/python/README.md → "What gets sent to DecideDB").
 export type DecisionRecord = {
   id: string;
   started_at: string;
@@ -44,7 +44,7 @@ type JevResponse = {
   usage?: { input_tokens?: number; output_tokens?: number };
 };
 
-// Context DecisionDB auto-added to a call (e.g. retrieved examples).
+// Context DecideDB auto-added to a call (e.g. retrieved examples).
 export type AddedContext = { source?: string; example_set?: string | null; body: Json };
 
 // ─────────────────────────────────────────────────────────────────────

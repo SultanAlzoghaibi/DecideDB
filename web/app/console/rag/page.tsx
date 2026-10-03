@@ -7,7 +7,7 @@ import { saveRagAction } from "./actions";
 import "@/styles/auth.css";
 import "@/styles/decisions.css";
 
-export const metadata: Metadata = { title: "RAG · DecisionDB" };
+export const metadata: Metadata = { title: "RAG · DecideDB" };
 
 type Search = Record<string, string | string[] | undefined>;
 const MODE_LABEL = { automatic: "A · Automatic", custom: "B · Custom", both: "Both" };
