@@ -13,11 +13,11 @@ import { NAMES, SECTIONS, codeFor, type Lang, type Variant } from "./content";
 const SECTION_IDS = SECTIONS.map((s) => s.id);
 
 const TOGGLES: Record<Lang, { key: string; options: { id: Variant; label: string }[] }> = {
-  python: { key: "jevdb-docs-python", options: [{ id: "async", label: "Async" }, { id: "sync", label: "Sync" }] },
-  js: { key: "jevdb-docs-js", options: [{ id: "ts", label: "TypeScript" }, { id: "js", label: "JavaScript" }] },
+  python: { key: "decisiondb-docs-python", options: [{ id: "async", label: "Async" }, { id: "sync", label: "Sync" }] },
+  js: { key: "decisiondb-docs-js", options: [{ id: "ts", label: "TypeScript" }, { id: "js", label: "JavaScript" }] },
 };
 
-const SYNC_WARNED_KEY = "jevdb-docs-sync-warned-at";
+const SYNC_WARNED_KEY = "decisiondb-docs-sync-warned-at";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 // localStorage can throw (private mode, blocked storage), so every access is guarded.
@@ -62,8 +62,8 @@ export function SdkLangDocs({ lang }: { lang: Lang }) {
     }
   };
 
-  // Python sync uses JevDB instead of AsyncJevDB; everything else comes from NAMES.
-  const n = lang === "python" && variant === "sync" ? { ...NAMES.python, client: "JevDB", flush: "flush()" } : NAMES[lang];
+  // Python sync uses DecisionDB instead of AsyncDecisionDB; everything else comes from NAMES.
+  const n = lang === "python" && variant === "sync" ? { ...NAMES.python, client: "DecisionDB", flush: "flush()" } : NAMES[lang];
   const code = (section: string) => {
     const c = codeFor(lang, section, variant);
     return c ? <CodeBlock label={c.file} code={c.code} /> : null;
@@ -108,7 +108,7 @@ export function SdkLangDocs({ lang }: { lang: Lang }) {
             Not on {lang === "python" ? "PyPI" : "npm"} yet.{" "}
             {lang === "python" ? (
               <>
-                For now: <code>uv add &quot;jevdb @ git+https://github.com/SultanAlzoghaibi/JevDB#subdirectory=sdk/python&quot;</code>
+                For now: <code>uv add &quot;decisiondb @ git+https://github.com/SultanAlzoghaibi/JevDB#subdirectory=sdk/python&quot;</code>
               </>
             ) : (
               <>For now, install it from the GitHub repo (<code>sdk/js</code>).</>
@@ -120,16 +120,16 @@ export function SdkLangDocs({ lang }: { lang: Lang }) {
             <p>It wraps TypeSafe&apos;s official Jev client, so you get that too.</p>
           </Section>
 
-          <Section id="env" title="Environment variables" tldr="Three variables: your Jev key, your JevDB key, and where JevDB runs." copy="JEVDB_API_KEY=jdb_live_…">
+          <Section id="env" title="Environment variables" tldr="Three variables: your Jev key, your DecisionDB key, and where DecisionDB runs." copy="DECISIONDB_API_KEY=jdb_live_…">
             {code("env")}
-            <p>Your Jev key only goes to Jev. Your JevDB key only goes to JevDB.</p>
+            <p>Your Jev key only goes to Jev. Your DecisionDB key only goes to DecisionDB.</p>
             <p>
-              <code>JEVDB_URL</code> is the JevDB Cloud URL. Self-hosting? Use <code>http://localhost:3000</code>.
+              <code>DECISIONDB_URL</code> is the DecisionDB Cloud URL. Self-hosting? Use <code>http://localhost:3000</code>.
             </p>
             <p>An argument passed to the client always wins over its environment variable.</p>
           </Section>
 
-          <Section id="quickstart" title="Quickstart" tldr={`Make one Jev call through ${n.client}. The answer comes back as usual, and JevDB keeps a copy.`}>
+          <Section id="quickstart" title="Quickstart" tldr={`Make one Jev call through ${n.client}. The answer comes back as usual, and DecisionDB keeps a copy.`}>
             {code("quickstart")}
             <p>
               <code>{n.call}</code> takes exactly TypeSafe&apos;s arguments and returns TypeSafe&apos;s response
@@ -175,15 +175,15 @@ export function SdkLangDocs({ lang }: { lang: Lang }) {
             </p>
           </Section>
 
-          <Section id="errors" title="Errors, flush() and shutdown" tldr={`JevDB never breaks your app. Call ${n.flush} before your process exits.`} copy={n.flush}>
+          <Section id="errors" title="Errors, flush() and shutdown" tldr={`DecisionDB never breaks your app. Call ${n.flush} before your process exits.`} copy={n.flush}>
             {code("errors")}
             <ul>
               <li>
                 <strong>Jev fails:</strong> the failure is logged, then the original error is raised again. Your code
-                behaves exactly as without JevDB.
+                behaves exactly as without DecisionDB.
               </li>
               <li>
-                <strong>JevDB is down:</strong> nothing breaks. The failed send calls <code>{n.onError}</code> (default:
+                <strong>DecisionDB is down:</strong> nothing breaks. The failed send calls <code>{n.onError}</code> (default:
                 a warning).
               </li>
               <li>
@@ -196,7 +196,7 @@ export function SdkLangDocs({ lang }: { lang: Lang }) {
           <Section id="logged" title="What gets logged" tldr="One record per call: the exact request, the exact response, timing and your labels.">
             {code("logged")}
             <p>
-              The JevDB key travels in the <code>Authorization</code> header. No key is ever in the body.
+              The DecisionDB key travels in the <code>Authorization</code> header. No key is ever in the body.
             </p>
           </Section>
         </article>

@@ -5,7 +5,7 @@ import { SdkFlowRagSide, SdkFlowRagStack } from "@/components/SdkFlowRagCache";
 
 // Preview page for comparing diagram versions. Not linked from the site.
 export const metadata: Metadata = {
-  title: "JevDB diagrams",
+  title: "DecisionDB diagrams",
   robots: { index: false },
 };
 
@@ -14,10 +14,10 @@ const VERSIONS = [
   { name: "B · SDK inside your app, linked by lines", Diagram: SdkFlowNested },
   { name: "C · your code + SDK joined, call! on the seam", Diagram: SdkFlowJoined },
   { name: "D · SDK wrapped around your code", Diagram: SdkFlowWrapped },
-  { name: "C2 · like C, but one JevDB under the SDK (on the landing page)", Diagram: SdkFlowOneDb },
+  { name: "C2 · like C, but one DecisionDB under the SDK (on the landing page)", Diagram: SdkFlowOneDb },
   { name: "RAG 1 · cache as a chip on the SDK", Diagram: SdkFlowRag },
   { name: "RAG 2 · side cache: lookup arrow in, return arrow out (from the sketch)", Diagram: SdkFlowRagSide },
-  { name: "RAG 3 · stacked cache: on the line from SDK to JevDB (on the landing page)", Diagram: SdkFlowRagStack },
+  { name: "RAG 3 · stacked cache: on the line from SDK to DecisionDB (on the landing page)", Diagram: SdkFlowRagStack },
 ];
 
 export default function DiagramsPage() {

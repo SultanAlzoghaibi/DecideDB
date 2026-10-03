@@ -1,4 +1,4 @@
--- JevDB response side: what Jev sent back, plus grading.
+-- DecisionDB response side: what Jev sent back, plus grading.
 -- Raw blob + fully structured decomposition. See notes/db-schema.md.
 
 -- ── Blob ────────────────────────────────────────────────────────────

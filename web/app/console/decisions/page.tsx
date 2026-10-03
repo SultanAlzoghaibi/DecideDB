@@ -10,7 +10,7 @@ import { parseQuery, rangeHours, RANGES, withToken, withoutToken, type Facet } f
 import "@/styles/auth.css";
 import "@/styles/decisions.css";
 
-export const metadata: Metadata = { title: "Decisions · JevDB" };
+export const metadata: Metadata = { title: "Decisions · DecisionDB" };
 
 type Search = Record<string, string | string[] | undefined>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) || undefined;
@@ -281,7 +281,7 @@ function EmptyState({ filtered, clearHref }: { filtered: boolean; clearHref: str
   return (
     <section className="console__card dx-empty">
       <h2>No decisions yet</h2>
-      <p>Call Jev through the JevDB SDK and every decision shows up here. Want to look around first? Add sample data:</p>
+      <p>Call Jev through the DecisionDB SDK and every decision shows up here. Want to look around first? Add sample data:</p>
       <pre className="dx-cmd">cd web &amp;&amp; bun run db:seed --email you@example.com</pre>
       <a className="btn btn--ghost" href="/docs/sdk">
         Read the SDK quickstart

@@ -5,9 +5,9 @@ export function Nav({ active }: { active?: "docs" | "console" }) {
   return (
     <header className="nav">
       <div className="container nav__inner">
-        <a href="/" className="nav__brand" aria-label="JevDB home">
+        <a href="/" className="nav__brand" aria-label="DecisionDB home">
           <Logo size={22} />
-          <span>JevDB</span>
+          <span>DecisionDB</span>
         </a>
         <nav className="nav__links">
           <a href="/docs" className={`nav__link${active === "docs" ? " nav__link--active" : ""}`}>

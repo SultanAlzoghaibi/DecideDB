@@ -4,21 +4,21 @@ Status: design only. Retrieval is step 5 in the build order and stays opt-in, de
 
 ## The problem
 Retrieval injects past graded examples into a request's `state` before it goes to Jev.
-So the examples must be ready *before* the Jev call. A naive version puts JevDB on the hot path:
+So the examples must be ready *before* the Jev call. A naive version puts DecisionDB on the hot path:
 
 ```
-your code → SDK → JevDB (find examples) → Jev → back
+your code → SDK → DecisionDB (find examples) → Jev → back
                   └── extra network round trip + query on every call
 ```
 
 - **Latency:** +20–100ms+ per call depending on where the app runs.
-- **Availability:** if JevDB is down, Jev calls stall.
+- **Availability:** if DecisionDB is down, Jev calls stall.
 - **Business:** hosted would be slower than self-hosted, which pushes users to self-host. Hosted is the money path, so that must not happen.
 
 ## Decision: cache examples in the SDK
 ```
 hot path:    your code → SDK [in-memory example cache] → Jev
-background:  SDK ⇄ JevDB   refresh cache (~60s)
+background:  SDK ⇄ DecisionDB   refresh cache (~60s)
 ```
 
 - **Cache key:** question version hash (key + type + instructions + criteria, see `question_versions` in db-schema.md).
@@ -26,8 +26,8 @@ background:  SDK ⇄ JevDB   refresh cache (~60s)
 - **Why it's safe:** grades arrive minutes to weeks after a decision, so the pool changes slowly. 60s stale is fine.
 - **Stale-while-revalidate:** after the TTL, keep serving the cached set and refresh in the background.
 - **Cheap refresh:** ETag / version per example set; unchanged → `304 Not Modified`.
-- **Never block, even on a miss:** empty cache or JevDB down → call Jev with no examples, fill the cache in the background. "No examples" is a valid result, so unlike Langfuse we don't wait on the first fetch.
-- **Serverless:** fresh instances start with an empty cache. Offer `jevdb.prefetch([...questionKeys])` and/or wait at most ~50ms on first use.
+- **Never block, even on a miss:** empty cache or DecisionDB down → call Jev with no examples, fill the cache in the background. "No examples" is a valid result, so unlike Langfuse we don't wait on the first fetch.
+- **Serverless:** fresh instances start with an empty cache. Offer `decisiondb.prefetch([...questionKeys])` and/or wait at most ~50ms on first use.
 
 ## Server side
 - Precompute each question's example set when a grade is added; store it in a Postgres table and serve with an ETag.
@@ -36,7 +36,7 @@ background:  SDK ⇄ JevDB   refresh cache (~60s)
 ## Open questions
 - **Relevance:** the README idea "Jev judges which examples are relevant" means a second Jev call per request (2x latency and cost) that no cache can hide. Start with per-question selection (no per-call matching). Later: cheap lexical similarity inside the SDK over the cached pool (still no network).
 - **Token cost:** injected examples add Jev input tokens. Keep K small.
-- **SDK shape:** injection needs the SDK to wrap the Jev call (`jevdb.systemOne({ state, questions })`), not just `log()` afterwards. Matches the landing-page diagram.
+- **SDK shape:** injection needs the SDK to wrap the Jev call (`decisiondb.systemOne({ state, questions })`), not just `log()` afterwards. Matches the landing-page diagram.
 - Log the original state and the injected context separately, so results with/without retrieval can be compared.
 
 ## Evidence from TypeSafe's docs (2026-09-26)
@@ -60,11 +60,11 @@ Langfuse solves the same problem for prompts: https://langfuse.com/docs/prompt-m
 
 Server side they use Redis in front of Postgres. Their tracing is separate: batched async sends with `flush()`, same as our `log()`.
 
-| Langfuse | JevDB |
+| Langfuse | DecisionDB |
 |---|---|
 | `getPrompt("name")` | examples for a question hash |
 | 60s TTL, background refresh | same |
 | blocking first fetch | **don't block**: call Jev without examples |
-| pre-fetch | `jevdb.prefetch([...])` |
+| pre-fetch | `decisiondb.prefetch([...])` |
 | fallback prompt | not needed: no examples = fallback |
 | Redis → Postgres | precomputed Postgres table first, Redis later if needed |

@@ -6,7 +6,7 @@ import { enabledProviders } from "@/lib/auth";
 import { getProfile } from "@/lib/session";
 import "@/styles/auth.css";
 
-export const metadata: Metadata = { title: "Log in · JevDB" };
+export const metadata: Metadata = { title: "Log in · DecisionDB" };
 
 // Error codes Better Auth adds as /login?error=<code> after a failed Google/GitHub login.
 const OAUTH_ERRORS: Record<string, string> = {

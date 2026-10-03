@@ -1,7 +1,7 @@
 {
-  "name": "@jevdb/sdk",
+  "name": "@decisiondb/sdk",
   "version": "0.2.0",
-  "description": "Call Jev and keep a copy of every decision in JevDB",
+  "description": "Call Jev and keep a copy of every decision in DecisionDB",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

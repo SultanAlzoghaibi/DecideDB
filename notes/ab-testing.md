@@ -28,9 +28,9 @@ Langfuse prompt labels (`prod-a` / `prod-b`) handle this when only the prompt di
 
 **Common things to vary:** chunk size and overlap, embedding model, top-k, adding a reranker, hybrid (keyword + vector) vs pure vector search, prompt wording.
 
-## Gaps in existing tools (JevDB's opening)
+## Gaps in existing tools (DecisionDB's opening)
 
-| Gap | Langfuse today | JevDB could |
+| Gap | Langfuse today | DecisionDB could |
 |---|---|---|
 | Traffic split | You write it | Built in: assign the variant on each logged request |
 | Auto-shift to winner | None | Bandit (Thompson sampling) shifts traffic automatically |

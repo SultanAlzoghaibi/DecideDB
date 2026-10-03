@@ -1,4 +1,4 @@
--- JevDB: every decision belongs to a profile, plus caller info, tags and added context.
+-- DecisionDB: every decision belongs to a profile, plus caller info, tags and added context.
 --
 -- 1. Every data table gets `profile_id`, so every query can (and must) filter by the
 --    logged-in profile. It sits on child tables too (answers, probabilities, ...), so a
@@ -7,7 +7,7 @@
 --    one profile's text is never shared with another's.
 -- 3. requests gets what the SDK sends about the call: decision id, timing, user, group.
 -- 4. request_tags: any number of free labels per call.
--- 5. context: when JevDB auto-adds context to a call (retrieval examples), the exact
+-- 5. context: when DecisionDB auto-adds context to a call (retrieval examples), the exact
 --    context is stored here and requests.context_added is set.
 
 -- ── 1. profile_id everywhere ───────────────────────────────────────
@@ -42,7 +42,7 @@ ALTER TABLE requests
   ADD COLUMN latency_ms     REAL,
   ADD COLUMN user_id        TEXT,          -- who triggered the call (your id)
   ADD COLUMN group_id       TEXT,          -- feature / team / app
-  ADD COLUMN sdk            TEXT,          -- e.g. jevdb-python/0.2.0
+  ADD COLUMN sdk            TEXT,          -- e.g. decisiondb-python/0.2.0
   ADD COLUMN context_added  BOOLEAN NOT NULL DEFAULT false,  -- true exactly when a `context` row exists
   ADD UNIQUE (profile_id, decision_id);    -- a retried send can't create a duplicate
 
@@ -58,7 +58,7 @@ CREATE TABLE request_tags (
   PRIMARY KEY (request_id, tag)
 );
 
--- ── 5. context JevDB added to a call ───────────────────────────────
+-- ── 5. context DecisionDB added to a call ───────────────────────────────
 
 CREATE TABLE context (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),

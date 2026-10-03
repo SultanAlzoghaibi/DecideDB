@@ -1,7 +1,7 @@
 {
-  "name": "jevdb-web",
+  "name": "decisiondb-web",
   "version": "1.0.0",
-  "description": "JevDB web app: landing, docs, dashboard, SDK ingest and dashboard API",
+  "description": "DecisionDB web app: landing, docs, dashboard, SDK ingest and dashboard API",
   "type": "module",
   "scripts": {
     "dev": "bun --bun next dev",

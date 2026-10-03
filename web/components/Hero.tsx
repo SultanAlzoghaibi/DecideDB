@@ -12,7 +12,7 @@ export function Hero() {
       <h1 className="hero__title">
         <span className="hero__title-muted">Jev forgets every call.</span>
         <br />
-        JevDB doesn't.
+        DecisionDB doesn't.
       </h1>
 
       <p className="hero__sub">

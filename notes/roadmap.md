@@ -1,14 +1,14 @@
 # Roadmap
 
 ## Version 1: see your Jev decisions (current)
-Everything on the landing page today. JevDB is a record of what Jev decided.
-- SDK sends a copy of every request + response to JevDB (non-blocking)
+Everything on the landing page today. DecisionDB is a record of what Jev decided.
+- SDK sends a copy of every request + response to DecisionDB (non-blocking)
 - Dashboard to browse and search decisions
 - Grading: tag a past decision good/bad from a real outcome
 - Hosted + self-hostable
 
 ## Version 2: a self-improving network
-JevDB stops being only a record and starts making future decisions better, using the grades from v1.
+DecisionDB stops being only a record and starts making future decisions better, using the grades from v1.
 A lot of ground to cover; treat each part as its own project.
 
 ### 2a. Score-based retrieval (RAG)

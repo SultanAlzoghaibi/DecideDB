@@ -10,8 +10,8 @@ services:
       POSTGRES_DB: jevdb
     ports:
       # Host port 5433 by default so it never clashes with a local Postgres on 5432.
-      # Running two checkouts at once? Set JEVDB_PG_PORT (and the port in DATABASE_URL).
-      - "${JEVDB_PG_PORT:-5433}:5432"
+      # Running two checkouts at once? Set DECISIONDB_PG_PORT (and the port in DATABASE_URL).
+      - "${DECISIONDB_PG_PORT:-5433}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/migrations:/docker-entrypoint-initdb.d:ro

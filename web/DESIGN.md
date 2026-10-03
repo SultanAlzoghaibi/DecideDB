@@ -1,11 +1,11 @@
-# JevDB Design System
+# DecisionDB Design System
 
 > Midnight precision instrument with a single orchid pulse.
 
 A blend of two references from https://styles.refero.design/:
 - **Linear** supplies the foundation: near-black surfaces, Inter type, tight tracking, hairline borders, compact spacing.
 - **Supabase** supplies the developer-tool attitude: flat and shadowless, borders instead of elevation, rationed accent, focus shown by a colored border rather than a glow.
-- **JevDB's own accent** is `#D45BB6` (orchid pink). It replaces Linear's acid lime and Supabase's phosphor green.
+- **DecisionDB's own accent** is `#D45BB6` (orchid pink). It replaces Linear's acid lime and Supabase's phosphor green.
 
 Theme: dark only (for now).
 
@@ -68,7 +68,7 @@ Two floating isometric records (a database), with the top face of the upper reco
 - Geometry (48×48 viewBox): record half-width 18.75, thickness 6.38, gap 7.25, stroke 3, round joins.
 - Strokes `#d0d6e0` on dark; shapes filled with the background so the top record hides the one behind it.
 - Always on dark. Never place it on a pink background, because that reads as TypeSafe's mark.
-- Minimum size 16px. Nav size 22px next to the "JevDB" wordmark (Inter 510).
+- Minimum size 16px. Nav size 22px next to the "DecisionDB" wordmark (Inter 510).
 
 ## Typography
 - **UI font:** Inter Variable, with `font-feature-settings: "cv01", "ss03", "zero"`. Fallback: system-ui.

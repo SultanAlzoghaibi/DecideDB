@@ -9,7 +9,7 @@ import { RagSettingsForm } from "@/components/rag/RagSettingsForm";
 import "@/styles/auth.css";
 import "@/styles/decisions.css";
 
-export const metadata: Metadata = { title: "RAG group · JevDB" };
+export const metadata: Metadata = { title: "RAG group · DecisionDB" };
 
 // One group's retrieval settings: the form on the left, what each setting does on the right.
 export default async function RagGroupPage({ params }: { params: Promise<{ group: string }> }) {

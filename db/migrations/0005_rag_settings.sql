@@ -1,4 +1,4 @@
--- JevDB: retrieval (RAG) settings, one row per group per profile.
+-- DecisionDB: retrieval (RAG) settings, one row per group per profile.
 -- No row = retrieval off for that group (the default).
 --   mode: automatic = best-graded past decisions, custom = hand-picked examples, both.
 --   automatic picks decisions in the same group, sharing the call's tags when same_tags,

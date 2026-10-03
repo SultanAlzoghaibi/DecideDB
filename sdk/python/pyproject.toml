@@ -1,10 +1,10 @@
 [project]
-name = "jevdb"
+name = "decisiondb"
 version = "0.2.0"
-description = "Call Jev and keep a copy of every decision in JevDB"
+description = "Call Jev and keep a copy of every decision in DecisionDB"
 readme = "README.md"
 requires-python = ">=3.9"
-# TypeSafe's official SDK: JevDB wraps its clients, so users keep the typed Noul/Choice/Score API.
+# TypeSafe's official SDK: DecisionDB wraps its clients, so users keep the typed Noul/Choice/Score API.
 dependencies = ["typesafe-sdk>=0.6.0"]
 
 [build-system]

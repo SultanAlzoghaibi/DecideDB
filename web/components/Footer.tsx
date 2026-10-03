@@ -7,7 +7,7 @@ export function Footer() {
       <div className="container footer__inner">
         <span className="footer__brand">
           <Logo size={16} />
-          JevDB · open source · early preview
+          DecisionDB · open source · early preview
         </span>
         <span className="footer__links">
           <a href="/docs">Docs</a>

@@ -8,7 +8,7 @@ export type Variant = "async" | "sync" | "ts" | "js";
 // Identifier names used inside the shared wording, per language.
 export const NAMES = {
   python: {
-    client: "AsyncJevDB",
+    client: "AsyncDecisionDB",
     call: "system_one",
     idOf: "id_of",
     flush: "flush()",
@@ -16,11 +16,11 @@ export const NAMES = {
     userId: "user_id",
     decisionId: "decision_id",
     onError: "on_error",
-    clientFile: "app/jevdb_client.py",
-    pkg: "jevdb",
+    clientFile: "app/decisiondb_client.py",
+    pkg: "decisiondb",
   },
   js: {
-    client: "JevDB",
+    client: "DecisionDB",
     call: "systemOne",
     idOf: "idOf",
     flush: "await flush()",
@@ -28,8 +28,8 @@ export const NAMES = {
     userId: "userId",
     decisionId: "decisionId",
     onError: "onError",
-    clientFile: "src/lib/jevdb.ts",
-    pkg: "@jevdb/sdk",
+    clientFile: "src/lib/decisiondb.ts",
+    pkg: "@decisiondb/sdk",
   },
 } as const;
 
@@ -70,21 +70,21 @@ const isSync = (v: Variant) => v === "sync";
 const aw = (v: Variant) => (isSync(v) ? "" : "await ");
 
 const PY: Record<string, CodeFor> = {
-  install: () => ({ file: "terminal", code: `uv add jevdb        # or: pip install jevdb` }),
+  install: () => ({ file: "terminal", code: `uv add decisiondb        # or: pip install decisiondb` }),
   env: () => ({
     file: ".env",
     code: `TYPESAFE_API_KEY=sk-…          # Jev, from console.typesafe.ai
-JEVDB_API_KEY=jdb_live_…       # JevDB, from your JevDB console
-JEVDB_URL=https://<jevdb-cloud-url>   # self-hosting: http://localhost:3000`,
+DECISIONDB_API_KEY=jdb_live_…       # DecisionDB, from your DecisionDB console
+DECISIONDB_URL=https://<decisiondb-cloud-url>   # self-hosting: http://localhost:3000`,
   }),
   quickstart: (v) => ({
     file: "main.py",
     code: isSync(v)
       ? `from typesafe_sdk import Choice, Noul, Score
-from jevdb import JevDB
+from decisiondb import DecisionDB
 
-with JevDB(group_id="support-bot") as jevdb:
-    response = jevdb.system_one(
+with DecisionDB(group_id="support-bot") as decisiondb:
+    response = decisiondb.system_one(
         state={"document": "${STATE}"},
         questions=${indent(PY_Q, 8)},
     )
@@ -95,12 +95,12 @@ print(response.scores["urgency"].score)`
       : `import asyncio
 
 from typesafe_sdk import Choice, Noul, Score
-from jevdb import AsyncJevDB
+from decisiondb import AsyncDecisionDB
 
 
 async def main() -> None:
-    async with AsyncJevDB(group_id="support-bot") as jevdb:
-        response = await jevdb.system_one(
+    async with AsyncDecisionDB(group_id="support-bot") as decisiondb:
+        response = await decisiondb.system_one(
             state={"document": "${STATE}"},
             questions=${indent(PY_Q, 12)},
         )
@@ -113,20 +113,20 @@ async def main() -> None:
 asyncio.run(main())`,
   }),
   "client-file": (v) => ({
-    file: "app/jevdb_client.py",
-    code: `from jevdb import ${isSync(v) ? "JevDB" : "AsyncJevDB"}
+    file: "app/decisiondb_client.py",
+    code: `from decisiondb import ${isSync(v) ? "DecisionDB" : "AsyncDecisionDB"}
 
 # One client for the whole app. Keys and URL come from .env.
-jevdb = ${isSync(v) ? "JevDB" : "AsyncJevDB"}(group_id="support-bot", tags=["prod"])`,
+decisiondb = ${isSync(v) ? "DecisionDB" : "AsyncDecisionDB"}(group_id="support-bot", tags=["prod"])`,
   }),
   "per-call": (v) => ({
     file: "app/tickets.py",
-    code: `from app.jevdb_client import jevdb
+    code: `from app.decisiondb_client import decisiondb
 from app.questions import QUESTIONS
 
 
 ${isSync(v) ? "def" : "async def"} triage(ticket, current_user):
-    return ${aw(v)}jevdb.system_one(
+    return ${aw(v)}decisiondb.system_one(
         state={"document": ticket.text},
         questions=QUESTIONS,
         user_id=current_user.id,        # changes every call
@@ -135,23 +135,23 @@ ${isSync(v) ? "def" : "async def"} triage(ticket, current_user):
   }),
   ids: (v) => ({
     file: "app/tickets.py",
-    code: `response = ${aw(v)}jevdb.system_one(state=..., questions=QUESTIONS)
-decision_id = jevdb.id_of(response)     # a UUID made by the SDK
+    code: `response = ${aw(v)}decisiondb.system_one(state=..., questions=QUESTIONS)
+decision_id = decisiondb.id_of(response)     # a UUID made by the SDK
 
 # Or use your own id, so grading later is just a lookup:
-${aw(v)}jevdb.system_one(state=..., questions=QUESTIONS, decision_id=ticket.id)`,
+${aw(v)}decisiondb.system_one(state=..., questions=QUESTIONS, decision_id=ticket.id)`,
   }),
   errors: (v) => ({
     file: "app/tickets.py",
     code: `from typesafe_sdk import TypeSafeAPIError
 
 try:
-    response = ${aw(v)}jevdb.system_one(state=..., questions=QUESTIONS)
-except TypeSafeAPIError as err:   # logged to JevDB, then re-raised
+    response = ${aw(v)}decisiondb.system_one(state=..., questions=QUESTIONS)
+except TypeSafeAPIError as err:   # logged to DecisionDB, then re-raised
     print(err.status, err.body)
 
 # On shutdown (the with-block does this for you):
-${isSync(v) ? "jevdb.close()" : "await jevdb.aclose()"}`,
+${isSync(v) ? "decisiondb.close()" : "await decisiondb.aclose()"}`,
   }),
 };
 
@@ -167,15 +167,15 @@ const ext = (v: Variant) => (v === "js" ? "js" : "ts");
 const isTs = (v: Variant) => v === "ts";
 
 const JS: Record<string, CodeFor> = {
-  install: () => ({ file: "terminal", code: `bun add @jevdb/sdk   # or: npm install @jevdb/sdk` }),
+  install: () => ({ file: "terminal", code: `bun add @decisiondb/sdk   # or: npm install @decisiondb/sdk` }),
   env: PY.env!,
   quickstart: (v) => ({
     file: `main.${ext(v)}`,
-    code: `import { JevDB, choice, noul, score } from "@jevdb/sdk";
+    code: `import { DecisionDB, choice, noul, score } from "@decisiondb/sdk";
 
-const jevdb = new JevDB({ groupId: "support-bot" });
+const decisiondb = new DecisionDB({ groupId: "support-bot" });
 
-const response = await jevdb.systemOne({
+const response = await decisiondb.systemOne({
   state: { document: "${STATE}" },
   questions: ${indent(JS_Q, 2)},
 });
@@ -184,22 +184,22 @@ console.log(response.answers.billing.noul);
 console.log(response.answers.tone.choice);
 console.log(response.answers.urgency.score);
 
-await jevdb.flush();`,
+await decisiondb.flush();`,
   }),
   "client-file": (v) => ({
-    file: `src/lib/jevdb.${ext(v)}`,
-    code: `import { JevDB } from "@jevdb/sdk";
+    file: `src/lib/decisiondb.${ext(v)}`,
+    code: `import { DecisionDB } from "@decisiondb/sdk";
 
 // One client for the whole app. Keys and URL come from .env.
-export const jevdb = new JevDB({ groupId: "support-bot", tags: ["prod"] });`,
+export const decisiondb = new DecisionDB({ groupId: "support-bot", tags: ["prod"] });`,
   }),
   "per-call": (v) => ({
     file: `src/tickets.${ext(v)}`,
-    code: `import { jevdb } from "./lib/jevdb";
+    code: `import { decisiondb } from "./lib/decisiondb";
 import { QUESTIONS } from "./questions";
 ${isTs(v) ? `import type { Ticket, User } from "./types";\n` : ""}
 export async function triage(${isTs(v) ? "ticket: Ticket, currentUser: User" : "ticket, currentUser"}) {
-  return jevdb.systemOne(
+  return decisiondb.systemOne(
     { state: { document: ticket.text }, questions: QUESTIONS },
     {
       userId: currentUser.id,         // changes every call
@@ -210,24 +210,24 @@ export async function triage(${isTs(v) ? "ticket: Ticket, currentUser: User" : "
   }),
   ids: (v) => ({
     file: `src/tickets.${ext(v)}`,
-    code: `const response = await jevdb.systemOne({ state, questions: QUESTIONS });
-const decisionId${isTs(v) ? ": string | undefined" : ""} = jevdb.idOf(response);   // a UUID made by the SDK
+    code: `const response = await decisiondb.systemOne({ state, questions: QUESTIONS });
+const decisionId${isTs(v) ? ": string | undefined" : ""} = decisiondb.idOf(response);   // a UUID made by the SDK
 
 // Or use your own id, so grading later is just a lookup:
-await jevdb.systemOne({ state, questions: QUESTIONS }, { decisionId: ticket.id });`,
+await decisiondb.systemOne({ state, questions: QUESTIONS }, { decisionId: ticket.id });`,
   }),
   errors: (v) => ({
     file: `src/tickets.${ext(v)}`,
     code: `import { APIError } from "@typesafe-ai/sdk";
 
 try {
-  const response = await jevdb.systemOne({ state, questions: QUESTIONS });
-} catch (err${isTs(v) ? ": unknown" : ""}) {   // logged to JevDB, then re-thrown
+  const response = await decisiondb.systemOne({ state, questions: QUESTIONS });
+} catch (err${isTs(v) ? ": unknown" : ""}) {   // logged to DecisionDB, then re-thrown
   if (err instanceof APIError) console.log(err.status, err.body);
 }
 
 // On shutdown (scripts, serverless, SIGTERM):
-await jevdb.flush();`,
+await decisiondb.flush();`,
   }),
 };
 

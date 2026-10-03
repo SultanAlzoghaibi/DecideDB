@@ -47,7 +47,7 @@ states ──< requests ──< answers >── question_versions >── instru
 
 ## Auth (`db/migrations/0003_auth.sql`)
 Owned by Better Auth (`web/lib/auth.ts`); regenerate with its CLI, don't hand-edit.
-- `profile` — one row per person who can log in. **Naming rule:** Better Auth calls it `user`; JevDB calls it a profile: table `profile`, FK column `profile_id`, `profileId` in code (`web/lib/session.ts`).
+- `profile` — one row per person who can log in. **Naming rule:** Better Auth calls it `user`; DecisionDB calls it a profile: table `profile`, FK column `profile_id`, `profileId` in code (`web/lib/session.ts`).
 - `session` (logged-in browsers), `account` (login methods; `password` is a hash), `verification` (short-lived codes).
 - Better Auth's own columns are camelCase (`"emailVerified"`), so quote them in SQL.
 
@@ -56,7 +56,7 @@ Owned by Better Auth (`web/lib/auth.ts`); regenerate with its CLI, don't hand-ed
 - Dedupe is per profile: `UNIQUE (profile_id, hash)` on `states`, `instructions`, `question_versions`.
 - `requests` also holds what the SDK sends: `decision_id` (unique per profile, makes retried sends a no-op), `started_at`, `latency_ms`, `user_id`, `group_id`, `sdk`, and `context_added`.
 - `request_tags (request_id, tag)`: any number of free labels per call.
-- `context`: when JevDB auto-adds context to a call (retrieval examples), the exact added context (`body` JSONB), its `source` and `example_set`; one per request. `requests.context_added` is true exactly when a `context` row exists.
+- `context`: when DecisionDB auto-adds context to a call (retrieval examples), the exact added context (`body` JSONB), its `source` and `example_set`; one per request. `requests.context_added` is true exactly when a `context` row exists.
 - Code: `web/lib/decisions.ts` (`saveDecision`, `listDecisions`, `getDecision`). Dummy data: `bun run db:seed` in `web/`.
 
 ## Applying migrations

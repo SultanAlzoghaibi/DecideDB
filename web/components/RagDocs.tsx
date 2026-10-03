@@ -21,9 +21,9 @@ const SECTIONS = [
 const SECTION_IDS = SECTIONS.map((s) => s.id);
 
 const ENABLE_PY = `
-from jevdb import JevDB
+from decisiondb import DecisionDB
 
-jevdb = JevDB(
+decisiondb = DecisionDB(
     group_id="support-bot",
     retrieval={
         "mode": "automatic",     # "automatic" | "custom" | "both"
@@ -35,9 +35,9 @@ jevdb = JevDB(
 `;
 
 const ENABLE_JS = `
-import { JevDB } from "@jevdb/sdk";
+import { DecisionDB } from "@decisiondb/sdk";
 
-export const jevdb = new JevDB({
+export const decisiondb = new DecisionDB({
   groupId: "support-bot",
   retrieval: {
     mode: "automatic",   // "automatic" | "custom" | "both"
@@ -104,7 +104,7 @@ export function RagDocs() {
         <h2>Walkthrough</h2>
         <p>
           Call 1 finds examples in the cache (hit). Then a decision gets graded. Call 2 misses the cache, so the
-          SDK fetches fresh examples from JevDB once and saves them for the next calls.
+          SDK fetches fresh examples from DecisionDB once and saves them for the next calls.
         </p>
         <FitWidth>
           <SdkFlowRagStack />
@@ -120,8 +120,8 @@ export function RagDocs() {
         </p>
         <CodeTabs
           tabs={[
-            { id: "py", label: "Python", file: "app/jevdb_client.py", code: ENABLE_PY },
-            { id: "js", label: "JavaScript", file: "src/lib/jevdb.ts", code: ENABLE_JS },
+            { id: "py", label: "Python", file: "app/decisiondb_client.py", code: ENABLE_PY },
+            { id: "js", label: "JavaScript", file: "src/lib/decisiondb.ts", code: ENABLE_JS },
           ]}
         />
       </section>
@@ -129,7 +129,7 @@ export function RagDocs() {
       <section id="automatic" className="doc">
         <h2>A · Automatic examples</h2>
         <p>
-          JevDB picks the examples for you from decisions you already graded. A decision qualifies when it is in
+          DecisionDB picks the examples for you from decisions you already graded. A decision qualifies when it is in
           the same group, shares the call&apos;s tags, and its grade score is at least <code>min_score</code>.
           The highest scores win.
         </p>

@@ -8,8 +8,8 @@ import { useEffect, useRef } from "react";
 //
 // Two examples share the animation:
 //   JsonToTableFlow      the plain Jev request
-//   JsonToTableFlowMeta  what the SDK sends to JevDB: the Jev request wrapped with
-//                        jevdb_user_id, jevdb_group_id and tags (who called what)
+//   JsonToTableFlowMeta  what the SDK sends to DecisionDB: the Jev request wrapped with
+//                        decisiondb_user_id, decisiondb_group_id and tags (who called what)
 
 // ---------- The example request, line by line. `k` = which pieces a line belongs to. ----------
 const JSON_LINES: { t: string; k: string[] }[] = [
@@ -89,12 +89,12 @@ const TABLES: Table[] = [
   },
 ];
 
-// ---------- Example 2: the JevDB envelope (who called what) ----------
+// ---------- Example 2: the DecisionDB envelope (who called what) ----------
 // The SDK wraps the Jev request with caller info. Jev only ever receives the inner "request".
 const META_LINES: { t: string; k: string[] }[] = [
   { t: "{", k: [] },
-  { t: '  "jevdb_user_id": "user_482",', k: ["user"] },
-  { t: '  "jevdb_group_id": "support-bot",', k: ["group"] },
+  { t: '  "decisiondb_user_id": "user_482",', k: ["user"] },
+  { t: '  "decisiondb_group_id": "support-bot",', k: ["group"] },
   { t: '  "tags": ["prod", "tickets"],', k: ["tags"] },
   { t: '  "request": {', k: [] },
   { t: '    "model": "jev-latest",', k: ["model"] },
@@ -182,7 +182,7 @@ const buildRows = (ex: Example) =>
 
 const BASIC: Example = { file: "request.json", lines: JSON_LINES, steps: STEPS, tables: TABLES };
 const META: Example = {
-  file: "sent to JevDB",
+  file: "sent to DecisionDB",
   lines: META_LINES,
   steps: META_STEPS,
   tables: META_TABLES,

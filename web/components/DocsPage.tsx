@@ -6,12 +6,12 @@ import { CodeBlock } from "./CodeBlock";
 import { CodeTabs } from "./CodeTabs";
 import { DocTable, DocsNav, useActiveSection } from "./docsShared";
 
-// Mock docs: they describe JevDB as designed, before the service exists.
+// Mock docs: they describe DecisionDB as designed, before the service exists.
 // Cloud first; self-hosting is the alternative.
 
 // Hosted URL isn't decided yet; change it here once it is.
-const CLOUD_URL = "https://<jevdb-cloud-url>";
-const GIT_PY = "jevdb @ git+https://github.com/SultanAlzoghaibi/JevDB#subdirectory=sdk/python";
+const CLOUD_URL = "https://<decisiondb-cloud-url>";
+const GIT_PY = "decisiondb @ git+https://github.com/SultanAlzoghaibi/JevDB#subdirectory=sdk/python";
 
 const SECTIONS = [
   { id: "introduction", label: "Introduction" },
@@ -54,7 +54,7 @@ export function DocsPage() {
           <div className="notice">
             <span className="tag tag--warn">Draft</span>
             <p>
-              These docs describe JevDB as designed. It isn&apos;t released yet, so names, URLs and
+              These docs describe DecisionDB as designed. It isn&apos;t released yet, so names, URLs and
               endpoints may change.
             </p>
           </div>
@@ -81,9 +81,9 @@ function Introduction() {
     <section id="introduction" className="doc">
       <h1>Introduction</h1>
       <p>
-        The Jev API is stateless: every call returns an answer and then it&apos;s gone. JevDB keeps a
-        record of everything. Your app still calls Jev itself; the JevDB SDK copies each request and
-        response to JevDB in the background, so it never slows your app down.
+        The Jev API is stateless: every call returns an answer and then it&apos;s gone. DecisionDB keeps a
+        record of everything. Your app still calls Jev itself; the DecisionDB SDK copies each request and
+        response to DecisionDB in the background, so it never slows your app down.
       </p>
       <ul>
         <li><strong>Log</strong>: every request and response is saved automatically.</li>
@@ -91,7 +91,7 @@ function Introduction() {
         <li><strong>Grade</strong>: tag a past decision good or bad once you know the real outcome.</li>
       </ul>
       <p>
-        The fastest way to start is <strong>JevDB Cloud</strong>: nothing to run. Prefer to keep
+        The fastest way to start is <strong>DecisionDB Cloud</strong>: nothing to run. Prefer to keep
         everything on your own servers? See <a href="#self-host">Self-host</a>.
       </p>
     </section>
@@ -109,27 +109,27 @@ function Quickstart() {
       <p>2. Install the SDK:</p>
       <CodeTabs
         tabs={[
-          { id: "uv", label: "Python (uv)", file: "terminal", code: "uv add jevdb" },
-          { id: "pip", label: "Python (pip)", file: "terminal", code: "pip install jevdb" },
-          { id: "bun", label: "JS (bun)", file: "terminal", code: "bun add @jevdb/sdk" },
-          { id: "npm", label: "JS (npm)", file: "terminal", code: "npm install @jevdb/sdk" },
+          { id: "uv", label: "Python (uv)", file: "terminal", code: "uv add decisiondb" },
+          { id: "pip", label: "Python (pip)", file: "terminal", code: "pip install decisiondb" },
+          { id: "bun", label: "JS (bun)", file: "terminal", code: "bun add @decisiondb/sdk" },
+          { id: "npm", label: "JS (npm)", file: "terminal", code: "npm install @decisiondb/sdk" },
         ]}
       />
       <p className="doc__note">
         Not on PyPI / npm yet. Until then, install straight from GitHub:{" "}
         <code>uv add &quot;{GIT_PY}&quot;</code>
       </p>
-      <p>3. Set your keys and point the SDK at JevDB Cloud:</p>
+      <p>3. Set your keys and point the SDK at DecisionDB Cloud:</p>
       <CodeBlock
         label=".env"
         code={`
 TYPESAFE_API_KEY=sk-…          # Jev, from console.typesafe.ai
-JEVDB_API_KEY=jdb_live_…       # JevDB, from your JevDB console
-JEVDB_URL=${CLOUD_URL}
+DECISIONDB_API_KEY=jdb_live_…       # DecisionDB, from your DecisionDB console
+DECISIONDB_URL=${CLOUD_URL}
 `}
       />
       <p>
-        4. Call Jev through the JevDB client, then open the <a href="/console">console</a> to see
+        4. Call Jev through the DecisionDB client, then open the <a href="/console">console</a> to see
         the decision. Full examples: <a href="/docs/sdk">Client SDK</a>.
       </p>
     </section>
@@ -139,39 +139,39 @@ JEVDB_URL=${CLOUD_URL}
 // One small module creates the client; the rest of the app imports it.
 const TREE_PY = `
 my-app/
-├── .env                  # TYPESAFE_API_KEY, JEVDB_API_KEY, JEVDB_URL
-├── pyproject.toml        # dependency: jevdb
+├── .env                  # TYPESAFE_API_KEY, DECISIONDB_API_KEY, DECISIONDB_URL
+├── pyproject.toml        # dependency: decisiondb
 └── app/
     ├── main.py           # your server / entry point
-    ├── jevdb_client.py   # ← create JevDB(...) once here
-    └── tickets.py        # from app.jevdb_client import jevdb
-                          #   jevdb.system_one(state=…, questions=…)
+    ├── decisiondb_client.py   # ← create DecisionDB(...) once here
+    └── tickets.py        # from app.decisiondb_client import decisiondb
+                          #   decisiondb.system_one(state=…, questions=…)
 `;
 
 const TREE_JS = `
 my-app/
-├── .env                  # TYPESAFE_API_KEY, JEVDB_API_KEY, JEVDB_URL
-├── package.json          # dependency: @jevdb/sdk
+├── .env                  # TYPESAFE_API_KEY, DECISIONDB_API_KEY, DECISIONDB_URL
+├── package.json          # dependency: @decisiondb/sdk
 └── src/
     ├── index.ts          # your server / entry point
     ├── lib/
-    │   └── jevdb.ts      # ← export const jevdb = new JevDB({...})
-    └── tickets.ts        # import { jevdb } from "./lib/jevdb"
-                          #   await jevdb.systemOne({ state, questions })
+    │   └── decisiondb.ts      # ← export const decisiondb = new DecisionDB({...})
+    └── tickets.ts        # import { decisiondb } from "./lib/decisiondb"
+                          #   await decisiondb.systemOne({ state, questions })
 `;
 
 const CLIENT_PY = `
-from jevdb import JevDB
+from decisiondb import DecisionDB
 
 # Keys and URL come from .env. One client for the whole app.
-jevdb = JevDB(group_id="support-bot", tags=["prod"])
+decisiondb = DecisionDB(group_id="support-bot", tags=["prod"])
 `;
 
 const CLIENT_JS = `
-import { JevDB } from "@jevdb/sdk";
+import { DecisionDB } from "@decisiondb/sdk";
 
 // Keys and URL come from .env. One client for the whole app.
-export const jevdb = new JevDB({ groupId: "support-bot", tags: ["prod"] });
+export const decisiondb = new DecisionDB({ groupId: "support-bot", tags: ["prod"] });
 `;
 
 function ProjectLayout() {
@@ -190,8 +190,8 @@ function ProjectLayout() {
       />
       <CodeTabs
         tabs={[
-          { id: "py", label: "Python", file: "app/jevdb_client.py", code: CLIENT_PY },
-          { id: "js", label: "JavaScript", file: "src/lib/jevdb.ts", code: CLIENT_JS },
+          { id: "py", label: "Python", file: "app/decisiondb_client.py", code: CLIENT_PY },
+          { id: "js", label: "JavaScript", file: "src/lib/decisiondb.ts", code: CLIENT_JS },
         ]}
       />
     </section>
@@ -209,7 +209,7 @@ function Logging() {
       <DocTable
         head={["Column", "Type", "Notes"]}
         rows={[
-          ["id", "text", "Decision id: jevdb.id_of(response)"],
+          ["id", "text", "Decision id: decisiondb.id_of(response)"],
           ["created_at", "timestamptz", "When the call started"],
           ["question_type", "text", "noul, choice or score"],
           ["answer", "text", "The typed answer, as text"],
@@ -232,7 +232,7 @@ function QuestionTypes() {
   return (
     <section id="question-types" className="doc">
       <h2>Question types</h2>
-      <p>Jev supports three question types. JevDB stores each one the same way, so they're all searchable.</p>
+      <p>Jev supports three question types. DecisionDB stores each one the same way, so they're all searchable.</p>
       <DocTable
         head={["Type", "Answers", "Stored answer"]}
         rows={[
@@ -257,7 +257,7 @@ function Grading() {
         label="terminal"
         code={`
 curl -X POST ${CLOUD_URL}/api/decisions/<decision-id>/grade \\
-  -H "Authorization: Bearer $JEVDB_API_KEY" \\
+  -H "Authorization: Bearer $DECISIONDB_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{ "grade": "good", "note": "customer accepted the refund" }'
 `}
@@ -296,20 +296,20 @@ function SelfHost() {
     <section id="self-host" className="doc">
       <h2>Self-host (alternative)</h2>
       <p>
-        Want your data on your own machines? Run JevDB yourself. You need Docker; Postgres runs in
+        Want your data on your own machines? Run DecisionDB yourself. You need Docker; Postgres runs in
         a container.
       </p>
       <CodeBlock
         label="terminal"
         code={`
-git clone https://github.com/SultanAlzoghaibi/JevDB.git jevdb
-cd jevdb
+git clone https://github.com/SultanAlzoghaibi/JevDB.git decisiondb
+cd decisiondb
 docker compose up -d        # Postgres
 cd web && bun install && bun run db:migrate && bun run dev
 `}
       />
       <p>
-        Then point the SDK at your instance with <code>JEVDB_URL=http://localhost:3000</code> (the
+        Then point the SDK at your instance with <code>DECISIONDB_URL=http://localhost:3000</code> (the
         SDK default). Everything else in these docs works the same.
       </p>
     </section>
@@ -321,7 +321,7 @@ function Configuration() {
     <section id="configuration" className="doc">
       <h2>Configuration</h2>
       <p>
-        Self-hosting only. JevDB Cloud is configured for you. Set these in{" "}
+        Self-hosting only. DecisionDB Cloud is configured for you. Set these in{" "}
         <code>web/.env.local</code>.
       </p>
       <DocTable
@@ -329,8 +329,8 @@ function Configuration() {
         rows={[
           ["DATABASE_URL", "(compose Postgres)", "Postgres connection string"],
           ["BETTER_AUTH_URL", "http://localhost:3000", "Where the dashboard is served"],
-          ["JEVDB_RETENTION_DAYS", "30", "Delete logs older than this; 0 keeps forever"],
-          ["JEVDB_RETRIEVAL", "off", "Experimental retrieval, see below"],
+          ["DECISIONDB_RETENTION_DAYS", "30", "Delete logs older than this; 0 keeps forever"],
+          ["DECISIONDB_RETRIEVAL", "off", "Experimental retrieval, see below"],
         ]}
       />
     </section>
@@ -344,7 +344,7 @@ function Retrieval() {
         Retrieval <span className="tag tag--warn">Experimental</span>
       </h2>
       <p>
-        When enabled, JevDB picks relevant graded examples from your history and adds them to a
+        When enabled, DecisionDB picks relevant graded examples from your history and adds them to a
         new request's <code>state</code> as few-shot context, aiming to improve accuracy.
       </p>
       <p>

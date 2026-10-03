@@ -4,7 +4,7 @@ import "@/styles/tokens.css";
 import "@/styles/app.css";
 
 export const metadata: Metadata = {
-  title: "JevDB",
+  title: "DecisionDB",
   description: "Self-hosted logging and outcome grading for the Jev API, backed by Postgres.",
 };
 

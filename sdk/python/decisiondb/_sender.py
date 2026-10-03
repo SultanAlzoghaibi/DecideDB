@@ -1,4 +1,4 @@
-"""Background sender: queues logs and POSTs them to JevDB from one daemon thread.
+"""Background sender: queues logs and POSTs them to DecisionDB from one daemon thread.
 
 Used by both clients. Sending never raises into the caller and never blocks a Jev call.
 Standard library only.
@@ -14,12 +14,12 @@ import threading
 import urllib.request
 from typing import Any, Callable, Optional
 
-# TODO(later): replace with the hosted JevDB URL once it exists.
+# TODO(later): replace with the hosted DecisionDB URL once it exists.
 DEFAULT_BASE_URL = "http://localhost:3000"
 
 
 def _warn(err: Exception) -> None:
-    print(f"[jevdb] failed to log: {err}")
+    print(f"[decisiondb] failed to log: {err}")
 
 
 class Sender:
@@ -30,16 +30,16 @@ class Sender:
         on_error: Callable[[Exception], None] = _warn,
         timeout: float = 5.0,
     ) -> None:
-        # JevDB key (not your Jev key). Sent as a header, never in the body.
-        self._api_key = api_key or os.environ.get("JEVDB_API_KEY")
-        base = base_url or os.environ.get("JEVDB_URL") or DEFAULT_BASE_URL
+        # DecisionDB key (not your Jev key). Sent as a header, never in the body.
+        self._api_key = api_key or os.environ.get("DECISIONDB_API_KEY")
+        base = base_url or os.environ.get("DECISIONDB_URL") or DEFAULT_BASE_URL
         self._url = base.rstrip("/") + "/ingest/response"
         self._on_error = on_error
         self._timeout = timeout
 
         # Logs wait here; one daemon thread sends them so logging returns instantly.
         self._queue: "queue.Queue[dict[str, Any]]" = queue.Queue()
-        self._worker = threading.Thread(target=self._run, name="jevdb-sender", daemon=True)
+        self._worker = threading.Thread(target=self._run, name="decisiondb-sender", daemon=True)
         self._worker.start()
         # Daemon threads die with the program, so send what's left on normal exit.
         atexit.register(self.flush)

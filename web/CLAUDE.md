@@ -1,6 +1,6 @@
 # web/
 
-The JevDB Next.js app (App Router), run with Bun. It is the only server: landing, docs, dashboard, SDK ingest and the dashboard API all live here. See the root `CLAUDE.md` for the big picture.
+The DecisionDB Next.js app (App Router), run with Bun. It is the only server: landing, docs, dashboard, SDK ingest and the dashboard API all live here. See the root `CLAUDE.md` for the big picture.
 
 ## Stack
 - Next.js + React + TypeScript on Bun. `bun run dev` / `bun run build` / `bun run start`. Keep it simple: few dependencies, plain readable components.
@@ -10,7 +10,7 @@ The JevDB Next.js app (App Router), run with Bun. It is the only server: landing
 - `app/**/page.tsx` — pages. Server components by default; add `"use client"` only to components that need state, effects or browser APIs.
 - `app/ingest/response/route.ts` — where the SDKs POST each Jev call.
 - `app/api/**/route.ts` — JSON endpoints for the dashboard.
-- `app/diagrams/` — design review page showing every version of the how-it-works diagram (`components/SdkFlow.tsx`). Not linked from the site; keep it for comparing designs. The landing page uses C2 (`SdkFlowOneDb`, one JevDB under the SDK) for the basic flow and RAG 3 (`SdkFlowRagStack`) for the advanced ML section.
+- `app/diagrams/` — design review page showing every version of the how-it-works diagram (`components/SdkFlow.tsx`). Not linked from the site; keep it for comparing designs. The landing page uses C2 (`SdkFlowOneDb`, one DecisionDB under the SDK) for the basic flow and RAG 3 (`SdkFlowRagStack`) for the advanced ML section.
 - `lib/` — server helpers (Postgres client, etc.). Only route handlers and server code import DB code, never client components.
 
 ## Screens (in build order)

@@ -116,7 +116,7 @@ export function LoginForm({
 
   return (
     <div className="auth__card">
-      <h1 className="auth__title">{isSignup ? "Create your account" : "Log in to JevDB"}</h1>
+      <h1 className="auth__title">{isSignup ? "Create your account" : "Log in to DecisionDB"}</h1>
       <p className="auth__sub">
         {isSignup ? "One account for your console and projects." : "Welcome back."}
       </p>
@@ -181,7 +181,7 @@ export function LoginForm({
       </form>
 
       <p className="auth__switch">
-        {isSignup ? "Already have an account? " : "New to JevDB? "}
+        {isSignup ? "Already have an account? " : "New to DecisionDB? "}
         <button
           type="button"
           onClick={() => {
